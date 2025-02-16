@@ -6,19 +6,24 @@ import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { existsSync } from 'fs';  
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 
 dotenv.config();
 
-const app = express();
-const WORKSPACE_DIR = join(process.cwd(), 'server', 'workspace');
-const CLIENT_DIST_PATH = join(process.cwd(), 'client', 'dist');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const app = express();
+const WORKSPACE_DIR = join(process.cwd(), 'server', 'workspace');
+const CLIENT_DIST_PATH = join(__dirname, '../client/dist'); 
 
 // Ensure workspace directory exists
 await fs.mkdir(WORKSPACE_DIR, { recursive: true }); 
 
 app.use(express.json({ limit: '10kb' }));
+app.use(express.static(CLIENT_DIST_PATH));
 
 // Enhanced CORS configuration
 app.use(cors({
@@ -26,8 +31,6 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-// Add this after CORS configuration
-app.use(express.static(CLIENT_DIST_PATH));
 
 // Security middleware for filename validation
 const validateFilename = (req, res, next) => {
@@ -346,11 +349,14 @@ app.post('/api/chat', async (req, res) => {
           }]
         },
         {
-          headers: {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'x-api-key': process.env.ANTHROPIC_API_KEY
-          }
+          headers: Object.assign(
+            {
+              'Content-Type': 'application/json',
+              'anthropic-version': '2023-06-01',
+              'x-api-key': process.env.ANTHROPIC_API_KEY
+            },
+            process.env.ANTHROPIC_API_KEY ? {} : { 'Authorization': `Bearer ${process.env.ANTHROPIC_API_KEY}` }
+          )
         }
       );
 
@@ -426,9 +432,9 @@ app.post('/api/chat', async (req, res) => {
 // 4) Start the server
 // -----------------------------------------------------
 
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
 app.get('*', (req, res) => {
   res.sendFile(join(CLIENT_DIST_PATH, 'index.html'));
 });
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

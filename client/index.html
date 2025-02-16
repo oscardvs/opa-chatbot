@@ -1,34 +1,21 @@
-<!--<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/odesha.png" />
-    <meta name="viewport" 
-  content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
-/>
-    <title>O.P.A</title>
-    <script type="module" crossorigin src="/assets/index-BShns0nU.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Ba5aIJ_e.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>-->
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OPA Chatbot</title>
-    <!-- Optional: if you want to use a favicon from public/ -->
-    <link rel="icon" href="/vite.svg" />
+    <title>O.P.A</title>
+    <!-- Preload important assets -->
+    <link rel="icon" href="/odesha.png" />
+    <link rel="preload" href="/images/odesha.gif" as="image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   </head>
-  <body>
-    <!-- This is the mount point for your React app -->
+  <body class="bg-purple-950">
     <div id="root"></div>
-    <!-- Load your entry module from the src folder -->
+    <!-- Vite will automatically inject the scripts here -->
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Dynamic import for code highlighting -->
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link async rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/dracula.min.css">
   </body>
 </html>
-
