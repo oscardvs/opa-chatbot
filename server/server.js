@@ -29,13 +29,14 @@ app.use(cors({
 }));
 
 // Production static serving
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' && process.env.SERVE_STATIC === 'true') {
   app.use(express.static(CLIENT_DIST_PATH, {
     setHeaders: (res) => {
       res.set('Cache-Control', 'public, max-age=31536000, immutable');
     }
   }));
 }
+
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

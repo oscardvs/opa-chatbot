@@ -8,10 +8,11 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     base: '/',
     build: {
-      outDir: env.VITE_BUILD_DIR || '../server/public',
+      outDir: env.VITE_BUILD_DIR || 'dist',
       emptyOutDir: true,
       sourcemap: mode === 'development'
     },
+    
     server: {
       host: '0.0.0.0',
       port: 5173,

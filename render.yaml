@@ -13,4 +13,4 @@ services:
   - type: static
     name: opa-frontend
     buildCommand: "cd client && npm install && VITE_API_URL=https://opa-backend.onrender.com npm run build"
-    publishPath: "client/dist"
+    publishPath: "dist"
