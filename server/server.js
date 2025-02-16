@@ -28,15 +28,6 @@ app.use(cors({
   credentials: true
 }));
 
-// Production static serving
-if (process.env.NODE_ENV === 'production' && process.env.SERVE_STATIC === 'true') {
-  app.use(express.static(CLIENT_DIST_PATH, {
-    setHeaders: (res) => {
-      res.set('Cache-Control', 'public, max-age=31536000, immutable');
-    }
-  }));
-}
-
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -445,10 +436,6 @@ app.post('/api/chat', async (req, res) => {
 // -----------------------------------------------------
 // 4) Start the server
 // -----------------------------------------------------
-
-app.get('*', (req, res) => {
-  res.sendFile(join(CLIENT_DIST_PATH, 'index.html'));
-});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
