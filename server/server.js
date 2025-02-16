@@ -17,7 +17,8 @@ const __dirname = dirname(__filename);
 
 const app = express();
 const WORKSPACE_DIR = join(process.cwd(), 'server', 'workspace');
-const CLIENT_DIST_PATH = join(__dirname, '../client/dist'); 
+const CLIENT_DIST_PATH = join(process.cwd(), 'client/dist') || 
+                         join(process.cwd(), 'server/public');
 
 // Ensure workspace directory exists
 await fs.mkdir(WORKSPACE_DIR, { recursive: true }); 

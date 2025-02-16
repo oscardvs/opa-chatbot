@@ -2,10 +2,12 @@ services:
   - type: web
     name: opa-backend
     runtime: node
-    buildCommand: npm install && cd client && npm install && npm run build && cd ..
+    buildCommand: |
+      cd client && npm install && npm run build
+      cd ../server && npm install
     startCommand: node server.js
     envVars:
       - key: ANTHROPIC_API_KEY
-        value: 
+        sync: false
       - key: NODE_ENV
         value: production
