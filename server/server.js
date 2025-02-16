@@ -12,26 +12,38 @@ const require = createRequire(import.meta.url);
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 const app = express();
 const WORKSPACE_DIR = join(process.cwd(), 'server', 'workspace');
-const CLIENT_DIST_PATH = join(process.cwd(), 'client/dist') || 
-                         join(process.cwd(), 'server/public');
+const CLIENT_DIST_PATH = process.env.NODE_ENV === 'production'
+  ? join(process.cwd(), 'client/dist')
+  : join(process.cwd(), 'server/public');
 
-// Ensure workspace directory exists
-await fs.mkdir(WORKSPACE_DIR, { recursive: true }); 
 
+// Middleware ordering fix
 app.use(express.json({ limit: '10kb' }));
-app.use(express.static(CLIENT_DIST_PATH));
-
-// Enhanced CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: process.env.NODE_ENV === 'production'
+    ? [process.env.FRONTEND_URL, 'https://*.render.com']
+    : 'http://localhost:5173',
   credentials: true
 }));
-app.use(express.json());
+
+// Production static serving
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(CLIENT_DIST_PATH, {
+    setHeaders: (res) => {
+      res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  }));
+}
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    version: process.env.npm_package_version
+  });
+});
 
 // Security middleware for filename validation
 const validateFilename = (req, res, next) => {
@@ -433,9 +445,10 @@ app.post('/api/chat', async (req, res) => {
 // 4) Start the server
 // -----------------------------------------------------
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-
 app.get('*', (req, res) => {
   res.sendFile(join(CLIENT_DIST_PATH, 'index.html'));
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+

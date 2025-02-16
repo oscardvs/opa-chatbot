@@ -1,27 +1,32 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
 
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    strictPort: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-        secure: false
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  
+  return {
+    plugins: [react()],
+    base: '/',
+    build: {
+      outDir: env.VITE_BUILD_DIR || '../server/public',
+      emptyOutDir: true,
+      sourcemap: mode === 'development'
+    },
+    server: {
+      host: '0.0.0.0',
+      port: 5173,
+      strictPort: true,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_URL || 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false
+        }
       }
     },
-    allowedHosts: [
-      'localhost',
-      '127.0.0.1'
-    ]
-  },
-  preview: {
-    port: 5173,
-    strictPort: true,
-    host: true
-  }
-})
+    preview: {
+      port: 5173,
+      strictPort: true
+    }
+  };
+});

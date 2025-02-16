@@ -17,8 +17,9 @@ import FileManager from './FileManager';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
-const API_BASE_URL = '/api';
+//const API_BASE_URL = '/api';
 
 const OPAChatbot = () => {
   const [messages, setMessages] = useState([]);
