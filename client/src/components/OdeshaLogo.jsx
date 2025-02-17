@@ -14,6 +14,12 @@ const handleCodeRequest = () => {
   );
 };
 
+const handleManualClick = () => {
+  onMessageSubmit(
+    "Please show me the user manual for O.P.A and explain all of its functionalities."
+  );
+};
+
   return (
     <div className="flex flex-col items-center justify-center py-12 select-none">
       {/* Logo Container with Glow Effect */}
@@ -94,6 +100,20 @@ const handleCodeRequest = () => {
           <span className="text-purple-400 text-xs">Write, Save, Run, Delete</span>
         </div>
       </button>
+      {/* NEW FULL-WIDTH BUTTON */}
+      <div className="col-span-2">
+        <button
+          onClick={handleManualClick}
+          className="w-full px-6 py-3 bg-purple-900/50 backdrop-blur-sm rounded-xl shadow-md 
+                    hover:shadow-purple-500/20 hover:bg-purple-800/50 transition-all duration-300 group"
+        >
+          <div className="text-purple-200 group-hover:scale-105 transform transition-transform">
+            <span className="block text-sm font-semibold">
+              Manual: Click here to discover what O.P.A can do and is used for
+            </span>
+          </div>
+        </button>
+      </div>
       </div>
     </div>
   );

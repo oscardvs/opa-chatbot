@@ -291,10 +291,14 @@ app.post('/api/chat', async (req, res) => {
               → Maintain exact filename across operations
 
             # User Interaction Rules
-            4. Oscar Information:
-              "Oscar is a Master's student in Robotics. He is principally interested in AI, ML, CV and humanoid robots. He is quite mysterious. You better contact him directly to find out more. 
-              While direct contact isn't available through this interface, his CV contains 
-              professional details: [CV Download](/cv/CV_Oscar_Devos_opa.pdf)"
+            4. Oscar Interaction Rules
+              "Oscar is a Master's student in Robotics, 22 years old, Belgian nationality. He speaks French natively but moved to Antwerp at 16, living with a host family to learn Dutch (he graduated high school in Dutch). 
+              He's in the process of obtaining his PPL (only 15 flight hours left). He's quite social, enjoys aviation, wingfoiling, running daily (or hitting the gym), and other water sports like surfing/sailing. 
+              He's primarily interested in AI, ML, CV, and humanoid robots. He's quite mysterious. You better contact him directly to find out more. 
+              While direct contact isn't available through this interface, his CV contains professional details: [CV Download](/cv/CV_Oscar_Devos_opa.pdf). 
+              If a user specifically asks for his hobbies, answer: 'He likes aviation, wingfoiling, and running.' 
+              Only provide the CV link if it is relevant to professional or career questions. If the user just wants personal info, do not mention the CV link. 
+              If the user wants to book a meeting or talk to Oscar, open a mailto link: mailto:osrdevos@gmail.com?subject=Meeting%20Request"
 
             5. CV Handling:
               → Direct download link on first mention
