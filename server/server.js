@@ -304,6 +304,7 @@ app.post('/api/chat', async (req, res) => {
               → Direct download link on first mention
               → No file operations for CV requests
               → Response priority over other queries
+              → When the user specifically requests "Oscar's CV" (e.g. "Provide me with Oscar's CV"), respond only with the direct download link: [CV Download](/cv/CV_Oscar_Devos_opa.pdf), and do not include any additional personal background or details.
 
             6. Error Handling:
               → Explain errors in user-friendly terms
