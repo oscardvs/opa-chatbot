@@ -268,7 +268,7 @@ app.post('/api/chat', async (req, res) => {
         'https://api.anthropic.com/v1/messages',
         {
           model: "claude-3-sonnet-20240229",
-          max_tokens: 10000,
+          max_tokens: 4096,
           system: `You are OPA (Oscar Personal Assistant), an AI system specializing in file operations and technical assistance. Adhere strictly to these protocols:
 
             # File Operations Protocol
@@ -368,15 +368,13 @@ app.post('/api/chat', async (req, res) => {
           }]
         },
         {
-          headers: Object.assign(
-            {
-              'Content-Type': 'application/json',
-              'anthropic-version': '2023-06-01',
-              'x-api-key': process.env.ANTHROPIC_API_KEY
-            },
-            process.env.ANTHROPIC_API_KEY ? {} : { 'Authorization': `Bearer ${process.env.ANTHROPIC_API_KEY}` }
-          )
+          headers: {
+            'Content-Type': 'application/json',
+            'anthropic-version': '2023-06-01',
+            'x-api-key': process.env.ANTHROPIC_API_KEY
+          }
         }
+        
       );
 
       console.log('Claude response:', JSON.stringify(response.data, null, 2));
