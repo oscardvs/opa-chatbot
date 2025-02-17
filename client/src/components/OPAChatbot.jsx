@@ -160,33 +160,68 @@ const OPAChatbot = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-purple-950 to-purple-900">
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-900 to-purple-800
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-900 to-purple-800 
                       border-b border-purple-700/50 backdrop-blur-md safe-top">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between">
-          <button
-                onClick={handleLogoClick}
-                className="bg-purple-700/50 p-2 rounded-lg transform hover:rotate-12 
-                          transition-transform duration-300"
-              >
+            
+            {/* Clickable Bot Icon (Top-Left) */}
+            <button 
+              onClick={handleLogoClick} 
+              className="
+                bg-purple-800 
+                text-purple-200
+                border border-purple-600 
+                p-2 
+                rounded-lg 
+                transform 
+                hover:rotate-12 
+                hover:bg-purple-700
+                transition-transform 
+                duration-300
+              "
+            >
               <Bot className="h-6 w-6 text-purple-200 animate-pulse" />
             </button>
-            <button
-                    onClick={handleLogoClick}
-                    className="flex flex-col items-start text-left"
-                  >
-              <h1 className="text-2xl font-bold text-purple-100 tracking-wider">O.P.A</h1>
+
+            {/* Clickable O.P.A Title (Middle) */}
+            <button 
+              onClick={handleLogoClick}
+              className="
+                bg-purple-800 
+                text-purple-100 
+                border border-purple-600 
+                px-3 py-2 
+                rounded-lg 
+                hover:bg-purple-700
+                transition-colors
+              "
+            >
+              <h1 className="text-2xl font-bold tracking-wider">O.P.A</h1>
               <p className="text-sm text-purple-300">Oscar Personal Assistant</p>
-              </button>
+            </button>
+
+            {/* Top-Right File Manager Button */}
             <button
               onClick={() => setShowFileManager(!showFileManager)}
-              className="p-2 text-purple-200 hover:text-purple-100 hover:bg-purple-700/50 rounded-lg transition-colors"
+              className="
+                p-2 
+                bg-purple-800
+                text-purple-200 
+                border border-purple-600 
+                rounded-lg 
+                hover:bg-purple-700 
+                hover:text-purple-100
+                transition-colors
+              "
             >
               <Folders className="h-5 w-5" />
             </button>
+
           </div>
         </div>
       </div>
+
 
       {/* Messages */}
       <div className="flex-1 overflow-hidden pt-28 pb-24 md:pb-20">
