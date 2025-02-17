@@ -151,6 +151,12 @@ const OPAChatbot = () => {
     await processMessage(message, true);
   };
 
+  const handleLogoClick = () => {
+    // Clear messages so that the user sees the landing page again
+    setMessages([]);
+  };
+  
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-purple-950 to-purple-900">
       {/* Header */}
@@ -158,13 +164,20 @@ const OPAChatbot = () => {
                       border-b border-purple-700/50 backdrop-blur-md safe-top">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="bg-purple-700/50 p-2 rounded-lg transform hover:rotate-12 transition-transform duration-300">
+          <button
+                onClick={handleLogoClick}
+                className="bg-purple-700/50 p-2 rounded-lg transform hover:rotate-12 
+                          transition-transform duration-300"
+              >
               <Bot className="h-6 w-6 text-purple-200 animate-pulse" />
-            </div>
-            <div>
+            </button>
+            <button
+                    onClick={handleLogoClick}
+                    className="flex flex-col items-start text-left"
+                  >
               <h1 className="text-2xl font-bold text-purple-100 tracking-wider">O.P.A</h1>
               <p className="text-sm text-purple-300">Oscar Personal Assistant</p>
-            </div>
+              </button>
             <button
               onClick={() => setShowFileManager(!showFileManager)}
               className="p-2 text-purple-200 hover:text-purple-100 hover:bg-purple-700/50 rounded-lg transition-colors"

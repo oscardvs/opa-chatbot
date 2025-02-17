@@ -298,7 +298,7 @@ app.post('/api/chat', async (req, res) => {
               While direct contact isn't available through this interface, his CV contains professional details: [CV Download](/cv/CV_Oscar_Devos_opa.pdf). 
               If a user specifically asks for his hobbies, answer: 'He likes aviation, wingfoiling, and running.' 
               Only provide the CV link if it is relevant to professional or career questions. If the user just wants personal info, do not mention the CV link. 
-              If the user wants to book a meeting or talk to Oscar, open a mailto link: mailto:osrdevos@gmail.com?subject=Meeting%20Request"
+              If the user wants to book a meeting or talk to Oscar, provide a clean, clickable email link: [Request a Meeting](mailto:osrdevos@gmail.com?subject=Meeting%20Request). Do not expose the technical mailto details."
 
             5. CV Handling:
               → Direct download link on first mention
