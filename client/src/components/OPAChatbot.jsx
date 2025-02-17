@@ -224,7 +224,7 @@ const OPAChatbot = () => {
 
 
       {/* Messages */}
-      <div className="flex-1 overflow-hidden pt-28 pb-24 md:pb-20">
+      <div className="flex-1 overflow-hidden pt-32 pb-24 md:pb-20">
         <div className="h-full w-full px-4 md:px-6 overflow-y-auto custom-scrollbar">
           {messages.length === 0 && (
             <div className="flex items-center justify-center h-full">
