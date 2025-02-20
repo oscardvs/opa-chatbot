@@ -27,7 +27,16 @@ const OPAChatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [showFileManager, setShowFileManager] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const requestFileAccess = () => {
+    if (window.confirm('Allow O.P.A to perform file operations on the server?')) {
+      setHasPermission(true);
+      // Optionally, send a request to the backend to log this permission
+      axios.post(`${API_BASE_URL}/api/request-access`, { permission: true });
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -70,6 +79,17 @@ const OPAChatbot = () => {
 
   const processMessage = async (messageText, isExternal = false) => {
     if (!messageText.trim()) return;
+
+      // Check permission before proceeding with file-related operations
+    if (
+      !hasPermission &&
+      (messageText.toLowerCase().includes('script') || 
+      messageText.toLowerCase().includes('code') || 
+      messageText.toLowerCase().includes('.js'))
+    ) {
+      alert('Please grant file access to perform this operation.');
+      return;
+    }
 
     // Show file manager if message contains code-related keywords
     if (!isExternal && (
@@ -224,13 +244,17 @@ const OPAChatbot = () => {
 
 
       {/* Messages */}
-      <div className="flex-1 overflow-hidden pt-32 pb-24 md:pb-20">
+      <div className="flex-1 overflow-hidden pt-34 pb-24 md:pb-20">
         <div className="h-full w-full px-4 md:px-6 overflow-y-auto custom-scrollbar">
-          {messages.length === 0 && (
-            <div className="flex items-center justify-center h-full">
-              <OdeshaLogo onMessageSubmit={handleExternalMessage} />
-            </div>
-          )}
+        {messages.length === 0 && (
+          <div className="flex items-center justify-center h-full">
+            <OdeshaLogo 
+              onMessageSubmit={handleExternalMessage} 
+              hasPermission={hasPermission} 
+              onRequestAccess={requestFileAccess} 
+            />
+          </div>
+        )}
 
           <div className="space-y-6 max-w-6xl mx-auto">
             {messages.map((message, index) => (

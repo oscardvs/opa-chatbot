@@ -1,24 +1,27 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 
-const OdeshaLogo = ({ onMessageSubmit }) => {
+const OdeshaLogo = ({ onMessageSubmit, hasPermission, onRequestAccess }) => {
   const handleCVClick = () => {
     onMessageSubmit("Provide me with Oscar's CV");
   };
 
-// New code request handler
-const handleCodeRequest = () => {
-  onMessageSubmit(
-    "Create a JavaScript file called graph_search.js that demonstrates a basic Graph Search Algorithm. " +
-    "Include code comments explaining the core principles. Save the file and execute it to show sample output."
-  );
-};
+  const handleCodeRequest = () => {
+    if (!hasPermission) {
+      alert('Please grant file access to perform this operation.');
+      return;
+    }
+    onMessageSubmit(
+      "Create a JavaScript file called graph_search.js that demonstrates a basic Graph Search Algorithm. " +
+      "Include code comments explaining the core principles. Save the file and execute it to show sample output."
+    );
+  };
 
-const handleManualClick = () => {
-  onMessageSubmit(
-    "Please show me the user manual for O.P.A and explain all of its functionalities."
-  );
-};
+  const handleManualClick = () => {
+    onMessageSubmit(
+      "Please show me the user manual for O.P.A and explain all of its functionalities."
+    );
+  };
 
   return (
     <div className="flex flex-col items-center justify-center py-12 select-none">
@@ -46,31 +49,31 @@ const handleManualClick = () => {
           Oscar Personal Assistant
         </p>
         <div className="flex space-x-2">
-            <a
-              href="https://x.com/oskrt_dvs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1 bg-purple-900/50 text-purple-200 rounded-full text-xs md:text-sm 
-                      hover:bg-purple-800/50 transition-colors cursor-pointer inline-flex items-center gap-1"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-              </svg>
-              Follow
-            </a>
-            
-            <a
-              href="mailto:osrdevos@gmail.com?subject=Contact%20from%20OPA%20User"
-              className="px-3 py-1 bg-purple-900/50 text-purple-200 rounded-full text-xs md:text-sm 
-                      hover:bg-purple-800/50 transition-colors cursor-pointer inline-flex items-center gap-1"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Contact Oscar
-            </a>
-          </div>
+          <a
+            href="https://x.com/oskrt_dvs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1 bg-purple-900/50 text-purple-200 rounded-full text-xs md:text-sm 
+                    hover:bg-purple-800/50 transition-colors cursor-pointer inline-flex items-center gap-1"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            Follow
+          </a>
+          
+          <a
+            href="mailto:osrdevos@gmail.com?subject=Contact%20from%20OPA%20User"
+            className="px-3 py-1 bg-purple-900/50 text-purple-200 rounded-full text-xs md:text-sm 
+                    hover:bg-purple-800/50 transition-colors cursor-pointer inline-flex items-center gap-1"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Contact Oscar
+          </a>
+        </div>
       </div>
       
       <div 
@@ -91,20 +94,29 @@ const handleManualClick = () => {
           </div>
         </button>
         <button 
-        onClick={handleCodeRequest} 
-        className="px-6 py-3 bg-purple-900/50 backdrop-blur-sm rounded-xl shadow-md 
-                   hover:shadow-purple-500/20 hover:bg-purple-800/50 transition-all duration-300 group"
-      >
-        <div className="text-purple-200 group-hover:scale-105 transform transition-transform">
-          <span className="block text-sm font-semibold">Ask to Code</span>
-          <span className="text-purple-400 text-xs">Write, Save, Run, Delete</span>
-        </div>
-      </button>
-      {/* NEW FULL-WIDTH BUTTON */}
-      <div className="col-span-2">
+          onClick={handleCodeRequest}
+          className="px-6 py-3 bg-purple-900/50 backdrop-blur-sm rounded-xl shadow-md 
+                    hover:shadow-purple-500/20 hover:bg-purple-800/50 transition-all duration-300 group"
+        >
+          <div className="text-purple-200 group-hover:scale-105 transform transition-transform">
+            <span className="block text-sm font-semibold">Ask to Code</span>
+            <span className="text-purple-400 text-xs">Write, Save, Run, Delete</span>
+          </div>
+        </button>
+        {/* New "Grant File Access" Button */}
+        <button
+          onClick={onRequestAccess}
+          className="col-span-2 px-6 py-3 bg-purple-900/50 backdrop-blur-sm rounded-xl shadow-md 
+                    hover:shadow-purple-500/20 hover:bg-purple-800/50 transition-all duration-300 group"
+        >
+          <div className="text-purple-200 group-hover:scale-105 transform transition-transform">
+            <span className="block text-sm font-semibold">Grant File Access</span>
+            <span className="text-purple-400 text-xs">Allow O.P.A to perform file operations</span>
+          </div>
+        </button>
         <button
           onClick={handleManualClick}
-          className="w-full px-6 py-3 bg-purple-900/50 backdrop-blur-sm rounded-xl shadow-md 
+          className="col-span-2 px-6 py-3 bg-purple-900/50 backdrop-blur-sm rounded-xl shadow-md 
                     hover:shadow-purple-500/20 hover:bg-purple-800/50 transition-all duration-300 group"
         >
           <div className="text-purple-200 group-hover:scale-105 transform transition-transform">
@@ -113,7 +125,6 @@ const handleManualClick = () => {
             </span>
           </div>
         </button>
-      </div>
       </div>
     </div>
   );

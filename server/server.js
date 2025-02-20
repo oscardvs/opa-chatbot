@@ -13,7 +13,17 @@ const require = createRequire(import.meta.url);
 dotenv.config();
 
 const app = express();
-const WORKSPACE_DIR = join(process.cwd(), 'server', 'workspace');
+const WORKSPACE_DIR = process.env.NODE_ENV === 'production'
+  ? '/workspace' // Render persistent disk
+  : join(__dirname, '..', 'workspace'); // Local development
+
+// Create workspace directory if it doesn’t exist
+try {
+  await fs.access(WORKSPACE_DIR);
+} catch (error) {
+  await fs.mkdir(WORKSPACE_DIR, { recursive: true });
+}
+
 const CLIENT_DIST_PATH = process.env.NODE_ENV === 'production'
   ? join(process.cwd(), 'client/dist')
   : join(process.cwd(), 'server/public');
@@ -21,9 +31,16 @@ const CLIENT_DIST_PATH = process.env.NODE_ENV === 'production'
 
 // Middleware ordering fix
 app.use(express.json({ limit: '10kb' }));
+//app.use(cors({
+//  origin: process.env.NODE_ENV === 'production'
+ //   ? [process.env.FRONTEND_URL, 'https://*.render.com']
+  //  : 'http://localhost:5173',
+ // credentials: true
+//}));
+
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL, 'https://*.render.com']
+    ? 'https://oscardevos.com'
     : 'http://localhost:5173',
   credentials: true
 }));
@@ -251,6 +268,16 @@ app.post('/api/execute/:filename', validateFilename, async (req, res) => {
   }
 });
 
+app.post('/api/request-access', (req, res) => {
+  const { permission } = req.body;
+  if (permission) {
+    console.log('User granted file operation permission');
+    res.json({ success: true, message: 'Permission granted on server' });
+  } else {
+    res.status(400).json({ error: 'Permission not granted' });
+  }
+});
+
 // -----------------------------------------------------
 // 3) Primary Chat Endpoint
 // -----------------------------------------------------
@@ -393,10 +420,8 @@ app.post('/api/chat', async (req, res) => {
         console.log('Processing tool:', toolUseBlock.id);
         
         try {
-          const fileOpsResponse = await axios.post(
-            'http://localhost:3000/api/claude/file-ops',
-            toolUseBlock.input
-          );
+          const fileOpsResponse = await axios.post('/api/claude/file-ops', toolUseBlock.input);
+
 
           // Add both the tool use and tool result to messages
           currentMessages.push({
