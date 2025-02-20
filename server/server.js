@@ -9,13 +9,12 @@ import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
-
 dotenv.config();
 
 const app = express();
 const WORKSPACE_DIR = process.env.NODE_ENV === 'production'
   ? '/workspace' // Render persistent disk
-  : join(__dirname, '..', 'workspace'); // Local development
+  : join(__dirname, '..', 'workspace');
 
 // Create workspace directory if it doesn’t exist
 try {
@@ -28,23 +27,14 @@ const CLIENT_DIST_PATH = process.env.NODE_ENV === 'production'
   ? join(process.cwd(), 'client/dist')
   : join(process.cwd(), 'server/public');
 
-
 // Middleware ordering fix
 app.use(express.json({ limit: '10kb' }));
-//app.use(cors({
-//  origin: process.env.NODE_ENV === 'production'
- //   ? [process.env.FRONTEND_URL, 'https://*.render.com']
-  //  : 'http://localhost:5173',
- // credentials: true
-//}));
-
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? 'https://oscardevos.com'
     : 'http://localhost:5173',
   credentials: true
 }));
-
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -63,11 +53,7 @@ const validateFilename = (req, res, next) => {
   next();
 };
 
-// -----------------------------------------------------
 // 1) File operations route (for Claude's tool calls)
-// -----------------------------------------------------
-
-
 app.post('/api/claude/file-ops', async (req, res) => {
   const { operation, filename, content } = req.body;
   const filePath = join(WORKSPACE_DIR, filename);
@@ -176,11 +162,7 @@ app.post('/api/claude/file-ops', async (req, res) => {
   }
 });
 
-// -----------------------------------------------------
 // 2) Endpoints for File Manager front-end
-// -----------------------------------------------------
-
-// List all files
 app.get('/api/files', async (req, res) => {
   try {
     const files = await fs.readdir(WORKSPACE_DIR);
@@ -190,7 +172,6 @@ app.get('/api/files', async (req, res) => {
   }
 });
 
-// Read a file
 app.get('/api/files/:filename', validateFilename, async (req, res) => {
   try {
     const filePath = join(WORKSPACE_DIR, req.params.filename);
@@ -201,7 +182,6 @@ app.get('/api/files/:filename', validateFilename, async (req, res) => {
   }
 });
 
-// Create/update file
 app.put('/api/files/:filename', validateFilename, async (req, res) => {
   try {
     const filePath = join(WORKSPACE_DIR, req.params.filename);
@@ -212,7 +192,6 @@ app.put('/api/files/:filename', validateFilename, async (req, res) => {
   }
 });
 
-// Delete a file
 app.delete('/api/files/:filename', validateFilename, async (req, res) => {
   try {
     const filePath = join(WORKSPACE_DIR, req.params.filename);
@@ -223,7 +202,6 @@ app.delete('/api/files/:filename', validateFilename, async (req, res) => {
   }
 });
 
-// Execute JS file
 app.post('/api/execute/:filename', validateFilename, async (req, res) => {
   try {
     const filePath = join(WORKSPACE_DIR, req.params.filename);
@@ -278,9 +256,7 @@ app.post('/api/request-access', (req, res) => {
   }
 });
 
-// -----------------------------------------------------
 // 3) Primary Chat Endpoint
-// -----------------------------------------------------
 app.post('/api/chat', async (req, res) => {
   try {
     console.log('Received chat request:', req.body.message);
@@ -402,7 +378,6 @@ app.post('/api/chat', async (req, res) => {
             'x-api-key': process.env.ANTHROPIC_API_KEY
           }
         }
-        
       );
 
       console.log('Claude response:', JSON.stringify(response.data, null, 2));
@@ -420,8 +395,19 @@ app.post('/api/chat', async (req, res) => {
         console.log('Processing tool:', toolUseBlock.id);
         
         try {
-          const fileOpsResponse = await axios.post('/api/claude/file-ops', toolUseBlock.input);
-
+          // Directly call the file operations logic
+          const fileOpsResponse = await new Promise((resolve, reject) => {
+            app._router.handle({
+              method: 'POST',
+              url: '/api/claude/file-ops',
+              body: toolUseBlock.input,
+              headers: { 'Content-Type': 'application/json' }
+            }, {
+              end: (data) => resolve(JSON.parse(data)),
+              status: (code) => ({ json: (data) => resolve(data) }),
+              send: (data) => resolve(data)
+            }, (err) => reject(err));
+          });
 
           // Add both the tool use and tool result to messages
           currentMessages.push({
@@ -434,7 +420,7 @@ app.post('/api/chat', async (req, res) => {
             content: [{
               type: "tool_result",
               tool_use_id: toolUseBlock.id,
-              content: fileOpsResponse.data.output || 
+              content: fileOpsResponse.output || 
                       `Successfully ${toolUseBlock.input.operation}d file ${toolUseBlock.input.filename}`
             }]
           });
@@ -450,7 +436,7 @@ app.post('/api/chat', async (req, res) => {
             content: [{
               type: "tool_result",
               tool_use_id: toolUseBlock.id,
-              content: `Error: ${error.response?.data?.error || error.message}`,
+              content: `Error: ${error.message}`,
               is_error: true
             }]
           });
@@ -471,10 +457,6 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// -----------------------------------------------------
 // 4) Start the server
-// -----------------------------------------------------
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-

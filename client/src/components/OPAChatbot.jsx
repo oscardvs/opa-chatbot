@@ -19,8 +19,6 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
-//const API_BASE_URL = '/api';
-
 const OPAChatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -80,12 +78,12 @@ const OPAChatbot = () => {
   const processMessage = async (messageText, isExternal = false) => {
     if (!messageText.trim()) return;
 
-      // Check permission before proceeding with file-related operations
+    // Check permission before proceeding with file-related operations
     if (
       !hasPermission &&
       (messageText.toLowerCase().includes('script') || 
-      messageText.toLowerCase().includes('code') || 
-      messageText.toLowerCase().includes('.js'))
+       messageText.toLowerCase().includes('code') || 
+       messageText.toLowerCase().includes('.js'))
     ) {
       alert('Please grant file access to perform this operation.');
       return;
@@ -244,17 +242,17 @@ const OPAChatbot = () => {
 
 
       {/* Messages */}
-      <div className="flex-1 overflow-hidden pt-34 pb-24 md:pb-20">
+      <div className="flex-1 overflow-hidden pt-28 pb-24 md:pb-20">
         <div className="h-full w-full px-4 md:px-6 overflow-y-auto custom-scrollbar">
-        {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full">
-            <OdeshaLogo 
-              onMessageSubmit={handleExternalMessage} 
-              hasPermission={hasPermission} 
-              onRequestAccess={requestFileAccess} 
-            />
-          </div>
-        )}
+          {messages.length === 0 && (
+            <div className="flex items-center justify-center h-full">
+              <OdeshaLogo 
+                onMessageSubmit={handleExternalMessage} 
+                hasPermission={hasPermission} 
+                onRequestAccess={requestFileAccess} 
+              />
+            </div>
+          )}
 
           <div className="space-y-6 max-w-6xl mx-auto">
             {messages.map((message, index) => (

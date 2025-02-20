@@ -6,6 +6,7 @@ const OdeshaLogo = ({ onMessageSubmit, hasPermission, onRequestAccess }) => {
     onMessageSubmit("Provide me with Oscar's CV");
   };
 
+  // New code request handler
   const handleCodeRequest = () => {
     if (!hasPermission) {
       alert('Please grant file access to perform this operation.');
@@ -24,7 +25,7 @@ const OdeshaLogo = ({ onMessageSubmit, hasPermission, onRequestAccess }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 select-none">
+    <div className="flex flex-col items-center justify-center py-12 select-none relative z-10">
       {/* Logo Container with Glow Effect */}
       <div className="relative w-32 h-32 md:w-40 md:h-40 transform hover:scale-110 transition-all duration-500">
         <div className="absolute inset-0 bg-purple-500/30 rounded-xl blur-xl animate-pulse"></div>
@@ -96,14 +97,14 @@ const OdeshaLogo = ({ onMessageSubmit, hasPermission, onRequestAccess }) => {
         <button 
           onClick={handleCodeRequest}
           className="px-6 py-3 bg-purple-900/50 backdrop-blur-sm rounded-xl shadow-md 
-                    hover:shadow-purple-500/20 hover:bg-purple-800/50 transition-all duration-300 group"
+                   hover:shadow-purple-500/20 hover:bg-purple-800/50 transition-all duration-300 group"
         >
           <div className="text-purple-200 group-hover:scale-105 transform transition-transform">
             <span className="block text-sm font-semibold">Ask to Code</span>
             <span className="text-purple-400 text-xs">Write, Save, Run, Delete</span>
           </div>
         </button>
-        {/* New "Grant File Access" Button */}
+        {/* Grant File Access Button */}
         <button
           onClick={onRequestAccess}
           className="col-span-2 px-6 py-3 bg-purple-900/50 backdrop-blur-sm rounded-xl shadow-md 
