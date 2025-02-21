@@ -1,16 +1,9 @@
+/* Tailwind directives must come first */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-
+/* Rest of the CSS rules */
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -29,6 +22,14 @@
 }
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 @keyframes logo-spin {

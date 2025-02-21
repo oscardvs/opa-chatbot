@@ -1,10 +1,9 @@
-// public/src/components/Lightbox.jsx
+// src/components/Lightbox.jsx
 import React from 'react';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 
 const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext }) => {
   const image = images[currentIndex];
-
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center animate-fade-in">
       <div className="relative">
@@ -20,7 +19,7 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext }) => {
         >
           <X className="h-5 w-5" />
         </button>
-        {/* Previous Button */}
+        {/* Navigation Buttons */}
         {onPrev && (
           <button
             onClick={onPrev}
@@ -29,7 +28,6 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext }) => {
             <ArrowLeft className="h-5 w-5" />
           </button>
         )}
-        {/* Next Button */}
         {onNext && (
           <button
             onClick={onNext}
