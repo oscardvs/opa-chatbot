@@ -242,7 +242,7 @@ const OPAChatbot = () => {
 
 
       {/* Messages */}
-      <div className="flex-1 overflow-hidden pt-28 pb-24 md:pb-20">
+      <div className="flex-1 overflow-hidden pt-32 pb-28 md:pb-20">
         <div className="h-full w-full px-4 md:px-6 overflow-y-auto custom-scrollbar">
           {messages.length === 0 && (
             <div className="flex items-center justify-center h-full">
@@ -373,7 +373,7 @@ const OPAChatbot = () => {
 
       {/* Input form */}
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-purple-900 to-purple-800
-                      border-t border-purple-700/50 backdrop-blur-md px-4 py-4 safe-bottom">
+                      border-t border-purple-700/50 backdrop-blur-md px-4 py-4 safe-bottom mb-8">
         <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
           <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-4">
             <input

@@ -51,7 +51,7 @@ const validateFilename = (req, res, next) => {
     return res.status(400).json({ error: 'Invalid filename' });
   }
   next();
-};
+}
 
 // 1) File operations route (for Claude's tool calls)
 app.post('/api/claude/file-ops', async (req, res) => {
@@ -397,16 +397,32 @@ app.post('/api/chat', async (req, res) => {
         try {
           // Directly call the file operations logic
           const fileOpsResponse = await new Promise((resolve, reject) => {
-            app._router.handle({
+            // Get the route handler for /api/claude/file-ops
+            const route = app._router.stack.find(layer => layer.route && layer.route.path === '/api/claude/file-ops' && layer.route.methods.post);
+            if (!route) {
+              reject(new Error('Route not found'));
+              return;
+            }
+
+            // Create a mock request and response
+            const req = {
               method: 'POST',
               url: '/api/claude/file-ops',
               body: toolUseBlock.input,
               headers: { 'Content-Type': 'application/json' }
-            }, {
-              end: (data) => resolve(JSON.parse(data)),
-              status: (code) => ({ json: (data) => resolve(data) }),
-              send: (data) => resolve(data)
-            }, (err) => reject(err));
+            };
+            const res = {
+              json: (data) => resolve(data),
+              status: (code) => ({
+                json: (data) => resolve(data),
+                send: (data) => resolve(data)
+              }),
+              setHeader: () => {}, // Add this to prevent setHeader errors
+              end: (data) => resolve(JSON.parse(data || '{}'))
+            };
+
+            // Call the route handler
+            route.route.stack[0].handle(req, res, (err) => err ? reject(err) : null);
           });
 
           // Add both the tool use and tool result to messages
