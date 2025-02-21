@@ -7,6 +7,7 @@ import { promises as fs } from 'fs';
 import { existsSync } from 'fs';  
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
+import { getImageByKeyword } from './imageHelper.js';
 const require = createRequire(import.meta.url);
 
 dotenv.config();
@@ -260,6 +261,21 @@ app.post('/api/request-access', (req, res) => {
 app.post('/api/chat', async (req, res) => {
   try {
     console.log('Received chat request:', req.body.message);
+
+    // Check if the message is requesting an image.
+    const imageUrl = getImageByKeyword(req.body.message);
+    if (imageUrl) {
+      // If an image is found, return a chat response with Markdown that renders the image.
+      return res.json({
+        content: [
+          {
+            type: "text",
+            text: `Here's a picture of Oscar:\n\n![Oscar](${imageUrl})`
+          }
+        ],
+        stop_reason: 'end_turn'
+      });
+    }
     
     let currentMessages = [
       { role: "user", content: req.body.message }
