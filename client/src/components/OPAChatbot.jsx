@@ -32,7 +32,7 @@ const OPAChatbot = () => {
     if (window.confirm('Allow O.P.A to perform file operations on the server?')) {
       setHasPermission(true);
       // Optionally, send a request to the backend to log this permission
-      axios.post(`${API_BASE_URL}/api/request-access`, { permission: true });
+      axios.post(`${API_BASE_URL}/request-access`, { permission: true });
     }
   };
 
