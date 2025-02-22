@@ -1,4 +1,4 @@
-@import url("highlight.js/styles/dracula.css");
+@import "node_modules/highlight.js/styles/dracula.css";
 
 @tailwind base;
 @tailwind components;
