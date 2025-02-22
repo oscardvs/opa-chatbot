@@ -1,5 +1,7 @@
-@import "node_modules/highlight.js/styles/dracula.css";
+/* Import highlight.js Dracula theme using URL syntax */
+@import url("./assets/styles/atom-one-dark.css");
 
+/* Tailwind directives must come first */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,13 +11,11 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  /* Remove or override if you want a different default:
+  /* Optionally override background color if desired:
      background-color: #242424; 
   */
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -30,7 +30,6 @@
   animation: fadeIn 0.3s ease-in-out;
 }
 
-
 /* Basic link styling */
 a {
   font-weight: 500;
@@ -41,13 +40,10 @@ a:hover {
   color: #535bf2;
 }
 
-/* Body resets — remove forced flex & background color */
+/* Body resets */
 body {
   margin: 0;
-  /* Optionally remove min-height if you prefer controlling
-     height in your React containers with Tailwind’s min-h-screen */
   min-width: 320px;
-  /* min-height: 100vh; (comment out if you prefer container-based height) */
 }
 
 /* Headings */
@@ -76,7 +72,7 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* Light-mode adjustments (optional) */
+/* Light-mode adjustments */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -103,56 +99,36 @@ button:focus-visible {
 }
 
 @keyframes pop {
-  0% {
-    transform: scale(0.95);
-  }
-  40% {
-    transform: scale(1.02);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(0.95); }
+  40% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
 
 /* Utility animation classes */
 .animate-fade-in {
   animation: fade-in 0.3s ease-out forwards;
 }
-
 .animate-pop {
   animation: pop 0.3s ease-out forwards;
 }
-
 .animate-fade-in-up {
   animation: fade-in-up 0.3s ease-out forwards;
 }
 
 /* Additional animations */
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 @keyframes shine {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }
 
 @keyframes ripple {
-  0% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
-  }
-  100% {
-    box-shadow: 0 0 0 20px rgba(59, 130, 246, 0);
-  }
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  100% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); }
 }
 
 .animate-float {
@@ -211,13 +187,8 @@ button:focus-visible {
 
 /* Improve touch targets on mobile */
 @media (max-width: 768px) {
-  button {
+  button, input {
     min-height: 44px;
     min-width: 44px;
   }
-  input {
-    min-height: 44px;
-  }
 }
-
-@import 'highlight.js/styles/dracula.css';

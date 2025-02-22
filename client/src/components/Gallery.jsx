@@ -1,4 +1,4 @@
-// public/src/components/Gallery.jsx
+// client/src/components/Gallery.jsx
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { imagesData } from '../utils/imagesData';
@@ -20,7 +20,9 @@ const Gallery = ({ onClose }) => {
   };
 
   const goToNext = () => {
-    setLightboxIndex((prev) => (prev < imagesData.length - 1 ? prev + 1 : prev));
+    setLightboxIndex((prev) =>
+      prev < imagesData.length - 1 ? prev + 1 : prev
+    );
   };
 
   return (
