@@ -24,6 +24,10 @@ const OdeshaLogo = ({ onMessageSubmit, hasPermission, onRequestAccess }) => {
     );
   };
 
+  const handleRandomPicture = () => {
+    onMessageSubmit("Show me a random picture of Oscar");
+  };
+
   return (
     <div className="flex flex-col items-center justify-center py-12 select-none relative z-10">
       {/* Logo Container with Glow Effect */}
@@ -124,6 +128,17 @@ const OdeshaLogo = ({ onMessageSubmit, hasPermission, onRequestAccess }) => {
             <span className="block text-sm font-semibold">
               Manual: Click here to discover what O.P.A can do and is used for
             </span>
+          </div>
+        </button>
+
+        <button 
+          onClick={handleRandomPicture}
+          className="col-span-2 px-6 py-3 bg-purple-900/50 backdrop-blur-sm rounded-xl shadow-md 
+                     hover:shadow-purple-500/20 hover:bg-purple-800/50 transition-all duration-300 group"
+        >
+          <div className="text-purple-200 group-hover:scale-105 transform transition-transform">
+            <span className="block text-sm font-semibold">Show me a picture of Oscar</span>
+            <span className="text-purple-400 text-xs">Displays a random image</span>
           </div>
         </button>
       </div>
