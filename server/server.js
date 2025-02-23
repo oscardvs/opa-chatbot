@@ -7,7 +7,7 @@ import { promises as fs } from 'fs';
 import { existsSync } from 'fs';  
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { getImageByKeyword } from './utils/imageHelper.js';  // now in server/utils
+import { getImageByKeyword } from './imageHelper.js';  
 const require = createRequire(import.meta.url);
 
 dotenv.config();
