@@ -178,6 +178,7 @@ const OPAChatbot = () => {
   const handleLogoClick = () => {
     // Clear messages so that the user sees the landing page again
     setMessages([]);
+    setShowGallery(false);
   };
 
   return (
@@ -209,7 +210,7 @@ const OPAChatbot = () => {
               <div className="flex items-center space-x-2">
                 {/* Gallery Button */}
                 <button
-                  onClick={() => setShowGallery(true)}
+                  onClick={() => setShowGallery(!showGallery)}
                   className="p-2 text-purple-200 hover:text-purple-100 hover:bg-purple-700/50 rounded-lg transition-colors"
                 >
                   <ImageIcon className="h-5 w-5" />

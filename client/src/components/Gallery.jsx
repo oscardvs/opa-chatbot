@@ -26,7 +26,7 @@ const Gallery = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 backdrop-blur-sm flex flex-col">
+    <div className="fixed inset-0 z-[9999] bg-black bg-opacity-70 backdrop-blur-sm flex flex-col">
       {/* Header with Close Button */}
       <div className="flex justify-end p-4">
         <button
