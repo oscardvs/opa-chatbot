@@ -48,8 +48,13 @@ app.get('/api/health', (req, res) => {
 // Security middleware for filename validation
 const validateFilename = (req, res, next) => {
   const filename = req.params.filename;
-  if (!filename || filename.includes('..') || filename.includes('/')) {
-    return res.status(400).json({ error: 'Invalid filename' });
+  const validExtensions = ['.js', '.py', '.cpp', '.txt', '.jsx', '.css', '.html'];
+  const fileExtension = filename ? filename.substring(filename.lastIndexOf('.')) : '';
+  
+  if (!filename || filename.includes('..') || filename.includes('/') || !validExtensions.includes(fileExtension)) {
+    return res.status(400).json({ 
+      error: `Invalid filename - must end with one of these extensions: ${validExtensions.join(', ')} and no directory traversal` 
+    });
   }
   next();
 };
@@ -60,9 +65,12 @@ app.post('/api/claude/file-ops', async (req, res) => {
   const filePath = join(WORKSPACE_DIR, filename);
 
   try {
-    if (!filename || filename.includes('..') || filename.includes('/') || !filename.endsWith('.js')) {
+    const validExtensions = ['.js', '.py', '.cpp', '.txt', '.jsx', '.css', '.html'];
+    const fileExtension = filename.substring(filename.lastIndexOf('.'));
+    
+    if (!filename || filename.includes('..') || filename.includes('/') || !validExtensions.includes(fileExtension)) {
       return res.status(400).json({ 
-        error: 'Invalid filename - must end with .js and no directory traversal' 
+        error: `Invalid filename - must end with one of these extensions: ${validExtensions.join(', ')} and no directory traversal` 
       });
     }
 
@@ -104,40 +112,147 @@ app.post('/api/claude/file-ops', async (req, res) => {
         if (!existsSync(filePath)) {
           return res.status(404).json({ error: 'File not found' });
         }
+        
         const fileContent = await fs.readFile(filePath, 'utf8');
         let output = '';
+        const fileExtension = filename.substring(filename.lastIndexOf('.'));
         
-        const { NodeVM } = await import('vm2');
-        const vm = new NodeVM({
-          console: 'redirect',
-          timeout: 5000,
-          sandbox: {
-            console: {
-              log: (...args) => output += args.join(' ') + '\n',
-              error: (...args) => output += 'ERROR: ' + args.join(' ') + '\n',
-              warn: (...args) => output += 'WARNING: ' + args.join(' ') + '\n'
-            }
-          },
-          require: {
-            external: false,
-            builtin: ['util', 'buffer', 'stream']
-          }
-        });
+        // Execute different file types using appropriate methods
+        switch (fileExtension) {
+          case '.js':
+          case '.jsx': {
+            // Execute JavaScript with VM2
+            const { NodeVM } = await import('vm2');
+            const vm = new NodeVM({
+              console: 'redirect',
+              timeout: 5000,
+              sandbox: {
+                console: {
+                  log: (...args) => output += args.join(' ') + '\n',
+                  error: (...args) => output += 'ERROR: ' + args.join(' ') + '\n',
+                  warn: (...args) => output += 'WARNING: ' + args.join(' ') + '\n'
+                }
+              },
+              require: {
+                external: false,
+                builtin: ['util', 'buffer', 'stream']
+              }
+            });
 
-        const wrappedCode = `
-          (async () => {
+            const wrappedCode = `
+              (async () => {
+                try {
+                  ${fileContent}
+                } catch (err) {
+                  console.error('Execution error:', err.message);
+                }
+              })();
+            `;
+            await vm.run(wrappedCode);
+            break;
+          }
+          
+          case '.py': {
+            // Simulate Python execution
+            output = `Python Execution Simulation:\n\n`;
+            output += `=== Input ===\n${fileContent}\n\n`;
+            
+            // Simple simulation for basic Python
             try {
-              ${fileContent}
+              const lines = fileContent.split('\n');
+              for (const line of lines) {
+                if (line.trim().startsWith('print(')) {
+                  const match = line.match(/print\s*\((.*)\)/);
+                  if (match && match[1]) {
+                    const content = match[1].trim();
+                    if (content.startsWith('"') && content.endsWith('"') || 
+                        content.startsWith("'") && content.endsWith("'")) {
+                      // String literals
+                      output += content.substring(1, content.length - 1) + '\n';
+                    } else if (!isNaN(content)) {
+                      // Numbers
+                      output += content + '\n';
+                    } else {
+                      // Variables or expressions (simplified)
+                      output += `[Variable: ${content}]\n`;
+                    }
+                  }
+                }
+              }
             } catch (err) {
-              console.error('Execution error:', err.message);
+              output += `Simulated error: ${err.message}\n`;
             }
-          })();
-        `;
-        await vm.run(wrappedCode);
+            break;
+          }
+          
+          case '.cpp': {
+            // Simulate C++ execution
+            output = `C++ Execution Simulation:\n\n`;
+            output += `=== Input ===\n${fileContent}\n\n`;
+            
+            // Simple simulation for basic C++ output
+            try {
+              const lines = fileContent.split('\n');
+              for (const line of lines) {
+                if (line.includes('cout <<')) {
+                  const coutMatch = line.match(/cout\s*<<\s*(.*?)\s*(<<?|;)/);
+                  if (coutMatch && coutMatch[1]) {
+                    const content = coutMatch[1].trim();
+                    if (content.startsWith('"') && content.endsWith('"')) {
+                      // String literals
+                      output += content.substring(1, content.length - 1);
+                      if (line.includes('endl')) {
+                        output += '\n';
+                      }
+                    } else {
+                      // Variables or other expressions
+                      output += `[Expression: ${content}]`;
+                      if (line.includes('endl')) {
+                        output += '\n';
+                      }
+                    }
+                  }
+                }
+              }
+            } catch (err) {
+              output += `Simulated error: ${err.message}\n`;
+            }
+            break;
+          }
+          
+          case '.html': {
+            // For HTML, we just return the content with preview information
+            output = `HTML Preview Simulation:\n\n`;
+            output += `=== This would render as: ===\n\n`;
+            output += `[HTML content would be displayed in a browser]\n\n`;
+            output += `=== Raw HTML ===\n${fileContent}`;
+            break;
+          }
+          
+          case '.css': {
+            // For CSS, we just return style information
+            output = `CSS Styles Simulation:\n\n`;
+            output += `=== These styles would be applied: ===\n\n`;
+            output += `[CSS styles would be applied to HTML elements]\n\n`;
+            output += `=== Raw CSS ===\n${fileContent}`;
+            break;
+          }
+          
+          case '.txt': {
+            // Just display text content
+            output = `=== Text File Content ===\n\n${fileContent}`;
+            break;
+          }
+          
+          default: {
+            output = `File type '${fileExtension}' is supported for viewing but not executing.`;
+          }
+        }
+        
         return res.json({ 
           success: true, 
           message: 'File executed',
-          output: output.trim() || 'Script executed successfully with no output.'
+          output: output.trim() || 'Execution completed with no output.'
         });
       }
       default: {
@@ -195,38 +310,149 @@ app.delete('/api/files/:filename', validateFilename, async (req, res) => {
 
 app.post('/api/execute/:filename', validateFilename, async (req, res) => {
   try {
-    const filePath = join(WORKSPACE_DIR, req.params.filename);
+    const filename = req.params.filename;
+    const filePath = join(WORKSPACE_DIR, filename);
+    
     if (!existsSync(filePath)) {
       return res.status(404).json({ error: 'File not found' });
     }
+    
     const fileContent = await fs.readFile(filePath, 'utf8');
     let output = '';
+    const fileExtension = filename.substring(filename.lastIndexOf('.'));
 
-    const { NodeVM } = await import('vm2');
-    const vm = new NodeVM({
-      console: 'redirect',
-      timeout: 5000,
-      sandbox: {
-        console: {
-          log: (...args) => output += args.join(' ') + '\n'
-        }
-      },
-      require: {
-        external: false,
-        builtin: ['util', 'buffer', 'stream']
+    // Execute different file types using appropriate methods
+    switch (fileExtension) {
+      case '.js':
+      case '.jsx': {
+        // Execute JavaScript with VM2
+        const { NodeVM } = await import('vm2');
+        const vm = new NodeVM({
+          console: 'redirect',
+          timeout: 5000,
+          sandbox: {
+            console: {
+              log: (...args) => output += args.join(' ') + '\n',
+              error: (...args) => output += 'ERROR: ' + args.join(' ') + '\n',
+              warn: (...args) => output += 'WARNING: ' + args.join(' ') + '\n'
+            }
+          },
+          require: {
+            external: false,
+            builtin: ['util', 'buffer', 'stream']
+          }
+        });
+
+        const wrappedCode = `
+          (async () => {
+            try {
+              ${fileContent}
+            } catch (err) {
+              console.log('Error:', err.message);
+            }
+          })();
+        `;
+        await vm.run(wrappedCode);
+        break;
       }
-    });
 
-    const wrappedCode = `
-      (async () => {
+      case '.py': {
+        // Simulate Python execution (since we can't actually run Python)
+        output = `Python Execution Simulation:\n\n`;
+        output += `=== Input ===\n${fileContent}\n\n`;
+        
+        // Simple simulation for basic Python
         try {
-          ${fileContent}
+          const lines = fileContent.split('\n');
+          for (const line of lines) {
+            if (line.trim().startsWith('print(')) {
+              const match = line.match(/print\s*\((.*)\)/);
+              if (match && match[1]) {
+                const content = match[1].trim();
+                if (content.startsWith('"') && content.endsWith('"') || 
+                    content.startsWith("'") && content.endsWith("'")) {
+                  // String literals
+                  output += content.substring(1, content.length - 1) + '\n';
+                } else if (!isNaN(content)) {
+                  // Numbers
+                  output += content + '\n';
+                } else {
+                  // Variables or expressions (simplified)
+                  output += `[Variable: ${content}]\n`;
+                }
+              }
+            }
+          }
         } catch (err) {
-          console.log('Error:', err.message);
+          output += `Simulated error: ${err.message}\n`;
         }
-      })();
-    `;
-    await vm.run(wrappedCode);
+        break;
+      }
+
+      case '.cpp': {
+        // Simulate C++ execution
+        output = `C++ Execution Simulation:\n\n`;
+        output += `=== Input ===\n${fileContent}\n\n`;
+        
+        // Simple simulation for basic C++ output
+        try {
+          const lines = fileContent.split('\n');
+          for (const line of lines) {
+            if (line.includes('cout <<')) {
+              const coutMatch = line.match(/cout\s*<<\s*(.*?)\s*(<<?|;)/);
+              if (coutMatch && coutMatch[1]) {
+                const content = coutMatch[1].trim();
+                if (content.startsWith('"') && content.endsWith('"')) {
+                  // String literals
+                  output += content.substring(1, content.length - 1);
+                  if (line.includes('endl')) {
+                    output += '\n';
+                  }
+                } else {
+                  // Variables or other expressions
+                  output += `[Expression: ${content}]`;
+                  if (line.includes('endl')) {
+                    output += '\n';
+                  }
+                }
+              }
+            }
+          }
+        } catch (err) {
+          output += `Simulated error: ${err.message}\n`;
+        }
+        break;
+      }
+
+      case '.html': {
+        // For HTML, we just return the content with preview information
+        output = `HTML Preview Simulation:\n\n`;
+        output += `=== This would render as: ===\n\n`;
+        output += `[HTML content would be displayed in a browser]\n\n`;
+        output += `=== Raw HTML ===\n${fileContent}`;
+        break;
+      }
+
+      case '.css': {
+        // For CSS, we just return style information
+        output = `CSS Styles Simulation:\n\n`;
+        output += `=== These styles would be applied: ===\n\n`;
+        output += `[CSS styles would be applied to HTML elements]\n\n`;
+        output += `=== Raw CSS ===\n${fileContent}`;
+        break;
+      }
+
+      case '.txt': {
+        // Just display text content
+        output = `=== Text File Content ===\n\n${fileContent}`;
+        break;
+      }
+
+      default: {
+        output = `File type '${fileExtension}' is supported for viewing but not executing.`;
+      }
+    }
+
     res.json({ result: output });
   } catch (error) {
     const errorMessage = error.message.startsWith('Script execution timed out')
@@ -306,11 +532,17 @@ app.post('/api/chat', async (req, res) => {
           system: `You are OPA (Oscar Personal Assistant), an AI system specializing in file operations, technical assistance, and maintaining conversation memory for multiple users. Adhere strictly to these protocols:
 
           1. File Operations Protocol:
-            - Filenames MUST end with .js.
+            - Filenames MUST end with one of these extensions: .js, .py, .cpp, .txt, .jsx, .css, .html
             - Reject special characters except [-_] and enforce a maximum length of 64 characters.
             - Prevent any directory traversal (e.g. ../).
-            - For Create/Update operations, require complete JavaScript code and reject empty files with "Please provide valid code content".
-            - Execution must always be done via the 'execute' operation.
+            - For Create/Update operations, require valid content appropriate for the file type and reject empty files with "Please provide valid content".
+            - All file types can be executed with the 'execute' operation:
+              * JavaScript (.js, .jsx): Runs in a secure VM2 sandbox
+              * Python (.py): Uses a simulated execution environment (parse and simulate basic output)
+              * C++ (.cpp): Uses a simulated execution environment (parse and simulate basic output)
+              * HTML (.html): Shows a preview simulation
+              * CSS (.css): Shows style application information
+              * Text (.txt): Shows file content
             - For chaining operations, follow: Create → Verify (via read) → Execute.
             - Never assume file existence; always verify with a 'read' operation before proceeding.
 
@@ -375,11 +607,18 @@ app.post('/api/chat', async (req, res) => {
           messages: currentMessages,
           tools: [{
             name: "manage_file",
-            description: `This tool manages JavaScript files in the workspace. 
-            - For file creation, you must supply complete, valid JavaScript code and the file name must end with .js (no special characters except '-' and '_' are allowed, with a maximum length of 64 characters).
-            - For file updates, provide the new code content. (Content is required for create and update operations, and limited to 10KB for security.)
+            description: `This tool manages multiple file types in the workspace. 
+            - Supported file types: .js, .py, .cpp, .txt, .jsx, .css, .html
+            - For file creation, you must supply valid content appropriate for the file type (file name must have one of the supported extensions, with no special characters except '-' and '_', and a maximum length of 64 characters).
+            - For file updates, provide the new content. (Content is required for create and update operations, and limited to 10KB for security.)
             - For reading, the file is first verified to exist.
-            - For execution, the file is run using a secure sandbox.
+            - All file types can be executed, each with specialized handling:
+              * JavaScript (.js, .jsx): Runs in a secure VM2 sandbox
+              * Python (.py): Uses a simulated execution environment
+              * C++ (.cpp): Uses a simulated execution environment
+              * HTML (.html): Shows a preview simulation
+              * CSS (.css): Shows style application information
+              * Text (.txt): Shows file content
             Always include the correct operation and parameters.`,
             input_schema: {
               type: "object",
@@ -391,11 +630,11 @@ app.post('/api/chat', async (req, res) => {
                 },
                 filename: { 
                   type: "string",
-                  description: "The file name (must end with .js, contain only letters, numbers, '-', and '_', and be at most 64 characters long)."
+                  description: "The file name (must end with one of these extensions: .js, .py, .cpp, .txt, .jsx, .css, .html, contain only letters, numbers, '-', and '_', and be at most 64 characters long)."
                 },
                 content: { 
                   type: "string",
-                  description: "The complete JavaScript code to be used for 'create' or 'update' operations. Not required for 'read' or 'execute'. (Maximum size: 10KB)"
+                  description: "The complete content to be used for 'create' or 'update' operations. Should be appropriate for the file type (e.g., JavaScript code for .js files, Python code for .py files, etc.). Not required for 'read' or 'execute'. (Maximum size: 10KB)"
                 }
               },
               required: ["operation", "filename"]

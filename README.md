@@ -1,24 +1,36 @@
 # O.P.A (Odesha Personal Assistant)
 
-An AI chatbot built with React and Claude API, featuring real-time interaction, syntax-highlighted Markdown responses, and responsive design.
+An AI chatbot built with React and Claude API, featuring real-time interaction, syntax-highlighted Markdown responses, file management, image gallery, and responsive design.
 
 ---
 
 ## Project Structure
 ```
 opa-chatbot/
-├── src/
-│   ├── components/
-│   │   └── OPAChatbot.jsx    # Main chatbot component
-│   ├── App.jsx              # Root component
-│   ├── index.css            # Global styles and animations
-│   └── main.jsx            # Entry point
-├── public/
-│   └── ...                 # Static assets
-├── server.js               # Backend server
-├── .env                    # Environment variables
-├── package.json           # Project dependencies
-└── README.md             # This file
+├── client/                    # Frontend application
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── OPAChatbot.jsx    # Main chatbot interface
+│   │   │   ├── FileManager.jsx   # JavaScript file editor
+│   │   │   ├── Gallery.jsx       # Image gallery
+│   │   │   ├── Lightbox.jsx      # Image lightbox
+│   │   │   └── OdeshaLogo.jsx    # Landing screen
+│   │   ├── utils/               # Utility functions
+│   │   ├── App.jsx              # Root component
+│   │   ├── index.css            # Global styles and animations
+│   │   └── main.jsx            # Entry point
+│   ├── public/
+│   │   ├── cv/                 # CV storage
+│   │   ├── images/             # Image gallery assets
+│   │   └── ...                 # Other static assets
+│   └── vite.config.js          # Vite configuration
+├── server/                     # Backend
+│   ├── server.js               # Express server
+│   ├── imageHelper.js          # Image search utility
+│   └── workspace/              # User file storage
+├── .env                        # Environment variables
+├── package.json                # Project dependencies
+└── README.md                   # This file
 ```
 
 ---
@@ -28,16 +40,32 @@ opa-chatbot/
 ### Frontend:
 - React (Vite)
 - Tailwind CSS (with Typography plugin)
-- Axios
-- Lucide React (icons)
-- React Markdown
-- Highlight.js (for code syntax highlighting)
+- Axios for API requests
+- Lucide React for icons
+- React Markdown with remark-gfm
+- Highlight.js for code syntax highlighting
+- CodeMirror for code editing
 
 ### Backend:
-- Express.js
-- CORS
-- Axios
-- dotenv
+- Express.js for server framework
+- Claude API (Anthropic) for AI capabilities
+- VM2 for sandboxed JavaScript execution
+- CORS for cross-origin handling
+- dotenv for environment management
+
+---
+
+## Features
+
+- **AI-powered chat** with Claude API integration and conversation memory
+- **Markdown rendering** with code syntax highlighting
+- **File management system** for creating, editing, and executing JavaScript files
+- **Image gallery** with search and lightbox functionality
+- **CV download** for easy resume access
+- **Responsive design** for desktop and mobile
+- **Interactive UI** with animations and loading indicators
+- **Secure code execution** in a sandboxed environment
+- **Multi-user support** with unique session tracking
 
 ---
 
@@ -45,147 +73,69 @@ opa-chatbot/
 
 ### 1. Install Dependencies
 ```bash
-# Create new Vite project
-npm create vite@latest opa-chatbot -- --template react
+# Clone the repository
+git clone https://github.com/yourusername/opa-chatbot.git
 cd opa-chatbot
 
-# Install frontend dependencies
-npm install axios lucide-react react-markdown remark-gfm rehype-highlight highlight.js
-
-# Install Tailwind CSS
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-
 # Install backend dependencies
-npm install express cors dotenv axios
+cd server
+npm install
+cd ..
+
+# Install frontend dependencies
+cd client
+npm install
 ```
 
 ### 2. Configure Environment
-Create `.env` file in project root:
+Create `.env` file in the server directory:
 ```
 ANTHROPIC_API_KEY=your_api_key_here
+PORT=3000
 ```
 
-### 3. Configure Tailwind
-Update `tailwind.config.js`:
-```javascript
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
-}
-```
+### 3. Running the Application
 
-### 4. Add CSS Styles
-Update `src/index.css`:
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Custom animations */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pop {
-  0% {
-    transform: scale(0.95);
-  }
-  40% {
-    transform: scale(1.02);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Syntax highlighting */
-@import 'highlight.js/styles/dracula.css';
-```
-
-### 5. Configure Vite
-Update `vite.config.js` to support proxying API requests:
-```javascript
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    strictPort: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
-    allowedHosts: [
-      'oscardevos.com',
-      'www.oscardevos.com',
-      'localhost',
-    ],
-  },
-});
-```
-
-### 6. Running the Application
-
+#### Development Mode
 1. Start the backend server:
 ```bash
-node server.js
+cd server
+npm run dev
 ```
 
 2. Start the frontend development server:
 ```bash
+cd client
 npm run dev
 ```
 
----
-
-## Markdown and Code Highlighting
-
-- **React Markdown**: Enables Markdown rendering in chat messages.
-- **Highlight.js**: Provides syntax highlighting for code blocks.
-- **Tailwind Typography**: Applies beautiful styles to Markdown content.
-
-Ensure the chatbot handles Markdown responses with code formatting:
-
-Example response:
-```markdown
-Here’s a Python script:
-
-```python
-for i in range(5):
-    print(i)
-```
-```
-
-Rendered code blocks use the Dracula theme from Highlight.js.
+The application will be available at `http://localhost:5173`
 
 ---
 
-## Deployment Instructions
+## Deployment
 
-### 1. Server Setup
+### Development Mode
+For local development:
+```bash
+# Terminal 1: Start backend with nodemon for auto-reloading
+cd server
+npm run dev
+
+# Terminal 2: Start frontend with Vite dev server
+cd client
+npm run dev
+```
+
+### Production Deployment
+
+#### 1. Build Frontend
+```bash
+cd client
+npm run build
+```
+
+#### 2. Server Setup (Ubuntu/Debian)
 ```bash
 sudo apt update
 sudo apt install nginx net-tools
@@ -195,9 +145,14 @@ sudo ufw allow 80
 sudo ufw allow 443
 ```
 
-### 2. Configure Nginx
+#### 3. Configure Nginx
 
-Update Nginx configuration for API proxying:
+Create Nginx configuration file:
+```bash
+sudo nano /etc/nginx/sites-available/oscardevos.com
+```
+
+Add the following content:
 ```nginx
 server {
     listen 443 ssl http2;
@@ -206,14 +161,21 @@ server {
     ssl_certificate /etc/letsencrypt/live/oscardevos.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/oscardevos.com/privkey.pem;
 
+    # Serve frontend static files
     location / {
-        proxy_pass http://localhost:5173;
-        proxy_set_header Host $host;
+        root /path/to/opa-chatbot/client/dist;
+        index index.html;
+        try_files $uri $uri/ /index.html;
     }
 
+    # Proxy API requests to backend
     location /api {
         proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
     }
 }
 
@@ -227,204 +189,114 @@ server {
 Enable and restart:
 ```bash
 sudo ln -s /etc/nginx/sites-available/oscardevos.com /etc/nginx/sites-enabled/
-sudo nginx -t
+sudo rm -f /etc/nginx/sites-enabled/default  # Optional: remove default site
+sudo nginx -t  # Test configuration
 sudo systemctl restart nginx
 ```
 
-### 3. SSL Certificate Setup
+#### 4. SSL Certificate Setup
 ```bash
 sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d oscardevos.com -d www.oscardevos.com
 ```
 
-### 4. Process Management
+#### 5. Process Management with PM2
 ```bash
-npm install -g pm2
+# Install PM2 globally
+sudo npm install -g pm2
+
+# Start the backend server
+cd /path/to/opa-chatbot/server
 pm2 start server.js --name "opa-backend"
-pm2 start npm --name "opa-frontend" -- run dev
+
+# Configure PM2 to start on system boot
+pm2 startup
 pm2 save
-```
-
----
-
-## Features
-
-- **Real-time chat** with Markdown support.
-- **Code syntax highlighting** with Highlight.js.
-- **Responsive design** for laptops and mobile.
-- **Interactive reactions** (thumbs up/down).
-- **Message animations**.
-
----
-
-## Future Improvements
-
-- Add message persistence.
-- Enable file uploads.
-- Add typing indicators.
-- Implement authentication.
-
----
-
-## Troubleshooting
-
-1. **502 Bad Gateway**:
-   - Check Nginx configuration.
-   - Confirm backend server is running.
-
-2. **Highlight.js not working**:
-   - Ensure Dracula CSS is imported in `index.css`.
-
-3. **Markdown rendering issues**:
-   - Ensure messages are properly formatted with triple backticks.
-
-# O.P.A (Odesha Personal Assistant)
-
-An AI chatbot built with React and Claude API, featuring real-time interaction, syntax-highlighted Markdown responses, and responsive design.
-
----
-
-## Project Structure
-```
-opa-chatbot/
-├── src/
-│   ├── components/
-│   │   ├── OPAChatbot.jsx    # Main chatbot component
-│   │   └── OdeshaLogo.jsx    # Logo component
-│   ├── App.jsx              # Root component
-│   ├── index.css            # Global styles and animations
-│   └── main.jsx            # Entry point
-├── public/
-│   ├── cv/                 # CV storage directory
-│   │   └── oscar_cv.pdf    # Your CV file
-│   └── ...                 # Other static assets
-├── server.js               # Backend server
-├── .env                    # Environment variables
-├── package.json           # Project dependencies
-└── README.md             # This file
-```
-
-[Previous sections remain the same until Features...]
-
-## Features
-
-- **Real-time chat** with Markdown support.
-- **Code syntax highlighting** with Highlight.js.
-- **Responsive design** for laptops and mobile.
-- **Interactive reactions** (thumbs up/down).
-- **Message animations**.
-- **CV download functionality** for easy resume access.
-
----
-
-## CV Download Feature Setup
-
-1. Create the CV directory structure:
-```bash
-mkdir -p public/cv
-```
-
-2. Place your CV file:
-```bash
-# Move your CV to the public directory
-mv your_cv.pdf public/cv/oscar_cv.pdf
-
-# Set proper permissions
-chmod 755 public/cv
-chmod 644 public/cv/oscar_cv.pdf
-```
-
-3. Configure the CV endpoint in server.js:
-```javascript
-import { dirname, join } from 'path';  // Add join import
-
-// Add CV download endpoint
-app.get('/api/download-cv', (req, res) => {
-  try {
-    const cvPath = join(__dirname, 'public', 'cv', 'oscar_cv.pdf');
-    res.download(cvPath, 'Oscar_DevOs_CV.pdf');
-  } catch (err) {
-    console.error('CV download error:', err);
-    res.status(500).send('Error downloading CV');
-  }
-});
-```
-
-4. Update Nginx configuration to handle CV downloads:
-```nginx
-location /api/ {
-    proxy_pass         http://localhost:3000/api/;
-    proxy_http_version 1.1;
-    proxy_set_header   Upgrade $http_upgrade;
-    proxy_set_header   Connection "upgrade";
-    proxy_set_header   Host $host;
-    proxy_cache_bypass $http_upgrade;
-}
 ```
 
 ---
 
 ## Server Management
 
-### When to Restart Services
+### Service Restart Procedure
 
-You need to restart the services in the following situations:
-1. After modifying server.js
-2. After updating Nginx configuration
-3. After adding new environment variables
-4. After installing new npm packages
-5. When experiencing 502 Bad Gateway errors
-6. When the application becomes unresponsive
-
-### Restart Procedure
-
-Always restart services in this specific order:
+When you need to restart services:
 
 ```bash
-# 1. Stop all PM2 processes
-pm2 stop all
+# Restart backend only
+pm2 restart opa-backend
 
-# 2. Delete all PM2 processes
-pm2 delete all
+# View logs
+pm2 logs opa-backend
 
-# 3. If you modified Nginx configuration:
+# If you modified Nginx configuration:
 sudo nginx -t                  # Test configuration
 sudo systemctl restart nginx   # Restart if test passes
 
-# 4. Start backend server
-pm2 start server.js --name "opa-backend"
-
-# 5. Start frontend development server
-pm2 start npm --name "opa-frontend" -- run dev
-
-# 6. Save PM2 process list
-  pm2 save
-
-# 7. Check if everything is running
+# Health check
 pm2 list
-```
-
-### Quick Health Check
-
-To verify your services are running correctly:
-
-```bash
-# Check PM2 processes
-pm2 list
-
-# Check PM2 logs
-pm2 logs opa-backend
-
-# Check Nginx status
 sudo systemctl status nginx
-
-# Check Nginx error logs
-sudo tail -f /var/log/nginx/error.log
-
-# Check if ports are being used
-sudo netstat -tlpn | grep -E ':80|:443|:3000|:5173'
 ```
+
+### Troubleshooting
+
+1. **502 Bad Gateway**:
+   - Check if backend server is running: `pm2 list`
+   - Check PM2 logs: `pm2 logs opa-backend`
+   - Verify Nginx configuration: `sudo nginx -t`
+
+2. **Frontend not loading**:
+   - Check Nginx error logs: `sudo tail -f /var/log/nginx/error.log`
+   - Verify that dist files are correctly built and accessible
+
+3. **File editor issues**:
+   - Check permissions on the workspace directory
+   - Verify VM2 sandbox configuration in server.js
 
 ---
 
-[Rest of the README remains the same...]
+## Future Improvements and Integrations
+
+### Planned Features
+- **Authentication system** for user accounts
+- **Database integration** for persistent chat history
+- **Voice input/output** capabilities
+- **Mobile app** version using React Native
+- **More tools integration** with Claude API
+
+### Potential Integrations
+- **GitHub integration** for code examples and project browsing
+- **Calendar integration** for scheduling and reminders
+- **Email integration** for sending messages directly from chat
+- **Notion/Obsidian integration** for knowledge management
+- **LinkedIn integration** for professional networking
+
+### Development Roadmap
+1. Implement authentication (Q2 2025)
+2. Add database persistence (Q3 2025)
+3. Create mobile application (Q4 2025)
+4. Enhance AI capabilities with specialized tools (Ongoing)
+
+---
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add some amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## Contact
+
+Oscar Devos - [website](https://oscardevos.com)

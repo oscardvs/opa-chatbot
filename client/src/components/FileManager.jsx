@@ -59,27 +59,57 @@ const FileManager = () => {
       setLoading(true);
       await fileOperations.saveFile(selectedFile, fileContent);
       await loadFiles();
+      return true; // Indicate successful save
     } catch (error) {
       console.error('Error saving file:', error);
+      return false; // Indicate save failure
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreateFile = async () => {
-    if (!newFileName || !newFileName.endsWith('.js')) {
-      alert('Filename must end with .js');
+    const validExtensions = ['.js', '.py', '.cpp', '.txt', '.jsx', '.css', '.html'];
+    const fileExtension = newFileName.substring(newFileName.lastIndexOf('.'));
+    
+    if (!newFileName || !validExtensions.includes(fileExtension)) {
+      alert(`Filename must end with one of these extensions: ${validExtensions.join(', ')}`);
       return;
     }
     if (!newFileName) return;
     try {
       setLoading(true);
-      await fileOperations.saveFile(newFileName, '// New file');
+      const fileExtension = newFileName.substring(newFileName.lastIndexOf('.'));
+      let defaultContent = '';
+      
+      // Create appropriate default content based on file type
+      switch (fileExtension) {
+        case '.js':
+        case '.jsx':
+          defaultContent = '// New JavaScript file\n\nconsole.log("Hello world!");';
+          break;
+        case '.py':
+          defaultContent = '# New Python file\n\nprint("Hello world!")';
+          break;
+        case '.cpp':
+          defaultContent = '#include <iostream>\n\nint main() {\n    std::cout << "Hello World!" << std::endl;\n    return 0;\n}';
+          break;
+        case '.html':
+          defaultContent = '<!DOCTYPE html>\n<html>\n<head>\n    <title>New Page</title>\n</head>\n<body>\n    <h1>Hello World!</h1>\n</body>\n</html>';
+          break;
+        case '.css':
+          defaultContent = '/* New CSS file */\n\nbody {\n    font-family: Arial, sans-serif;\n    margin: 0;\n    padding: 20px;\n}';
+          break;
+        default:
+          defaultContent = '// New file';
+      }
+      
+      await fileOperations.saveFile(newFileName, defaultContent);
       await loadFiles();
       setIsCreating(false);
       setNewFileName('');
       setSelectedFile(newFileName);
-      setFileContent('// New file');
+      setFileContent(defaultContent);
     } catch (error) {
       console.error('Error creating file:', error);
     } finally {
@@ -104,12 +134,31 @@ const FileManager = () => {
   };
 
   const handleExecuteFile = async () => {
-    if (!selectedFile || !selectedFile.endsWith('.js')) return;
+    if (!selectedFile) return;
     try {
       setLoading(true);
       const { result } = await fileOperations.executeFile(selectedFile);
       setExecutionResult(result);
     } catch (error) {
+      setExecutionResult(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Combined save and execute function to prevent race conditions
+  const handleSaveAndExecute = async () => {
+    if (!selectedFile) return;
+    setLoading(true);
+    try {
+      const saveSuccess = await handleSaveFile();
+      if (saveSuccess) {
+        // Small delay to ensure file is completely saved
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await handleExecuteFile();
+      }
+    } catch (error) {
+      console.error('Error in save and execute:', error);
       setExecutionResult(`Error: ${error.message}`);
     } finally {
       setLoading(false);
@@ -178,8 +227,16 @@ const FileManager = () => {
                 onClick={() => handleFileSelect(file.name)}
               >
                 <div className="flex items-center space-x-2">
-                  {file.name.endsWith('.js') ? (
+                  {file.name.endsWith('.js') || file.name.endsWith('.jsx') ? (
                     <Code className="h-4 w-4 text-yellow-400" />
+                  ) : file.name.endsWith('.py') ? (
+                    <Code className="h-4 w-4 text-blue-400" />
+                  ) : file.name.endsWith('.cpp') ? (
+                    <Code className="h-4 w-4 text-green-400" />
+                  ) : file.name.endsWith('.html') ? (
+                    <Code className="h-4 w-4 text-orange-400" />
+                  ) : file.name.endsWith('.css') ? (
+                    <Code className="h-4 w-4 text-pink-400" />
                   ) : (
                     <FileText className="h-4 w-4 text-purple-400" />
                   )}
@@ -225,16 +282,14 @@ const FileManager = () => {
                       <Save className="h-4 w-4" />
                       <span>Save</span>
                     </button>
-                    {selectedFile.endsWith('.js') && (
-                      <button
-                        onClick={handleExecuteFile}
-                        className="flex items-center space-x-2 px-4 py-2 bg-green-700 hover:bg-green-600 
-                                 text-green-100 rounded-lg transition-colors"
-                      >
-                        <Play className="h-4 w-4" />
-                        <span>Run</span>
-                      </button>
-                    )}
+                    <button
+                      onClick={handleSaveAndExecute}
+                      className="flex items-center space-x-2 px-4 py-2 bg-green-700 hover:bg-green-600 
+                               text-green-100 rounded-lg transition-colors"
+                    >
+                      <Play className="h-4 w-4" />
+                      <span>Save & Run</span>
+                    </button>
                   </div>
                 </div>
                 {executionResult !== null && (
