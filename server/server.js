@@ -33,8 +33,8 @@ const CLIENT_DIST_PATH = process.env.NODE_ENV === 'production'
 app.use(express.json({ limit: '10kb' }));
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? 'https://oscardevos.com'
-    : 'http://localhost:5173',
+    ? ['https://oscardevos.com', 'https://opa-frontend.onrender.com']
+    : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true
 }));
 

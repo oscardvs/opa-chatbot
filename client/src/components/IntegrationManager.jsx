@@ -10,9 +10,7 @@ const IntegrationManager = ({ onClose }) => {
   const [message, setMessage] = useState({ text: '', type: '' });
   
   // Base API URL - to handle different deployment environments
-  const apiBaseUrl = window.location.hostname === 'localhost' 
-    ? 'http://localhost:3000/api' 
-    : '/api';
+  const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
 
   // Check if there are existing tokens stored
   useEffect(() => {
