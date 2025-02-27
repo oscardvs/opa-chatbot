@@ -28,108 +28,129 @@ const IntegrationManager = ({ onClose }) => {
 
   // Handle OAuth flow for Google services (Calendar & Gmail)
   const handleGoogleAuth = async (service) => {
-    // Google OAuth client ID
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
-    if (!clientId) {
-      showMessage('Google Client ID not configured', 'error');
-      return;
-    }
-
-    // Scopes needed for calendar and email
-    const scopes = service === 'calendar'
-      ? 'https://www.googleapis.com/auth/calendar'
-      : 'https://www.googleapis.com/auth/gmail.send';
-
-    // Create OAuth URL
-    const redirectUri = window.location.origin;
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scopes}`;
-
-    // Store the requested service to handle the callback
-    sessionStorage.setItem('auth_service', service);
-
-    // Open the OAuth popup
-    const popup = window.open(authUrl, 'oauth', 'width=500,height=600');
-    
-    // Poll to check if popup closed
-    const checkPopup = setInterval(() => {
-      if (!popup || popup.closed) {
-        clearInterval(checkPopup);
-
-        // Check if we got a token from URL hash
-        const hash = window.location.hash;
-        if (hash && hash.includes('access_token')) {
-          const token = hash.split('access_token=')[1].split('&')[0];
-          
-          if (service === 'calendar') {
-            calendarIntegration.init(token)
-              .then(() => {
-                setCalendarAuth(true);
-                showMessage('Google Calendar connected successfully');
-              })
-              .catch(err => {
-                showMessage(`Failed to connect Calendar: ${err.message}`, 'error');
-              });
-          } else {
-            emailIntegration.init(token)
-              .then(() => {
-                setEmailAuth(true);
-                showMessage('Gmail connected successfully');
-              })
-              .catch(err => {
-                showMessage(`Failed to connect Gmail: ${err.message}`, 'error');
-              });
-          }
-          
-          // Clean up the URL hash
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
+    try {
+      // Request client ID from backend
+      const response = await fetch('/api/integrations/auth-config');
+      const config = await response.json();
+      
+      if (!config.googleClientId) {
+        showMessage('Google Client ID not configured on server', 'error');
+        return;
       }
-    }, 500);
+      
+      const clientId = config.googleClientId;
+
+      // Scopes needed for calendar and email
+      const scopes = service === 'calendar'
+        ? 'https://www.googleapis.com/auth/calendar'
+        : 'https://www.googleapis.com/auth/gmail.send';
+
+      // Create OAuth URL
+      const redirectUri = window.location.origin;
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scopes}`;
+
+      // Store the requested service to handle the callback
+      sessionStorage.setItem('auth_service', service);
+
+      // Open the OAuth popup
+      const popup = window.open(authUrl, 'oauth', 'width=500,height=600');
+      
+      // Poll to check if popup closed
+      const checkPopup = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(checkPopup);
+
+          // Check if we got a token from URL hash
+          const hash = window.location.hash;
+          if (hash && hash.includes('access_token')) {
+            const token = hash.split('access_token=')[1].split('&')[0];
+            
+            if (service === 'calendar') {
+              calendarIntegration.init(token)
+                .then(() => {
+                  setCalendarAuth(true);
+                  showMessage('Google Calendar connected successfully');
+                })
+                .catch(err => {
+                  showMessage(`Failed to connect Calendar: ${err.message}`, 'error');
+                  console.error('Calendar error:', err);
+                });
+            } else {
+              emailIntegration.init(token)
+                .then(() => {
+                  setEmailAuth(true);
+                  showMessage('Gmail connected successfully');
+                })
+                .catch(err => {
+                  showMessage(`Failed to connect Gmail: ${err.message}`, 'error');
+                  console.error('Gmail error:', err);
+                });
+            }
+            
+            // Clean up the URL hash
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        }
+      }, 500);
+    } catch (error) {
+      showMessage(`Authentication error: ${error.message}`, 'error');
+      console.error('Google auth error:', error);
+    }
   };
 
   // Handle OAuth for LinkedIn
   const handleLinkedinAuth = async () => {
-    // LinkedIn OAuth client ID
-    const clientId = process.env.REACT_APP_LINKEDIN_CLIENT_ID || '';
-    if (!clientId) {
-      showMessage('LinkedIn Client ID not configured', 'error');
-      return;
-    }
-
-    // Create OAuth URL
-    const redirectUri = window.location.origin;
-    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=r_liteprofile,r_emailaddress,w_member_social`;
-
-    // Store the requested service to handle the callback
-    sessionStorage.setItem('auth_service', 'linkedin');
-
-    // Open the OAuth popup
-    const popup = window.open(authUrl, 'oauth', 'width=500,height=600');
-    
-    // Poll to check if popup closed
-    const checkPopup = setInterval(() => {
-      if (!popup || popup.closed) {
-        clearInterval(checkPopup);
-
-        // Check if we got a token from URL hash
-        const hash = window.location.hash;
-        if (hash && hash.includes('access_token')) {
-          const token = hash.split('access_token=')[1].split('&')[0];
-          
-          linkedinIntegration.init(token)
-            .then(() => {
-              setLinkedinAuth(true);
-              showMessage('LinkedIn connected successfully');
-            })
-            .catch(err => {
-              showMessage(`Failed to connect LinkedIn: ${err.message}`, 'error');
-            });
-          
-          // Clean up the URL hash
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
+    try {
+      // Request client ID from backend
+      const response = await fetch('/api/integrations/auth-config');
+      const config = await response.json();
+      
+      if (!config.linkedinClientId) {
+        showMessage('LinkedIn Client ID not configured on server', 'error');
+        return;
       }
-    }, 500);
+      
+      const clientId = config.linkedinClientId;
+
+      // Create OAuth URL
+      const redirectUri = window.location.origin;
+      const authUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=r_liteprofile,r_emailaddress,w_member_social`;
+
+      // Store the requested service to handle the callback
+      sessionStorage.setItem('auth_service', 'linkedin');
+
+      // Open the OAuth popup
+      const popup = window.open(authUrl, 'oauth', 'width=500,height=600');
+      
+      // Poll to check if popup closed
+      const checkPopup = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(checkPopup);
+
+          // Check if we got a token from URL hash
+          const hash = window.location.hash;
+          if (hash && hash.includes('access_token')) {
+            const token = hash.split('access_token=')[1].split('&')[0];
+            
+            linkedinIntegration.init(token)
+              .then(() => {
+                setLinkedinAuth(true);
+                showMessage('LinkedIn connected successfully');
+              })
+              .catch(err => {
+                showMessage(`Failed to connect LinkedIn: ${err.message}`, 'error');
+                console.error('LinkedIn error:', err);
+              });
+            
+            // Clean up the URL hash
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        }
+      }, 500);
+    } catch (error) {
+      showMessage(`Authentication error: ${error.message}`, 'error');
+      console.error('LinkedIn auth error:', error);
+    }
   };
 
   // Disconnect integration

@@ -3,8 +3,19 @@
 
 import express from 'express';
 import { calendarHandler, gmailHandler, linkedinHandler } from '../integrationHandler.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = express.Router();
+
+// Endpoint to securely provide client IDs to the frontend
+router.get('/auth-config', (req, res) => {
+  res.json({
+    googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+    linkedinClientId: process.env.LINKEDIN_CLIENT_ID || ''
+  });
+});
 
 // Authorization endpoints
 router.get('/auth/google/callback', async (req, res) => {
