@@ -12,8 +12,65 @@ const IntegrationManager = ({ onClose }) => {
   // Base API URL - to handle different deployment environments
   const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
 
-  // Check if there are existing tokens stored
+  // Process OAuth callback and check existing tokens
   useEffect(() => {
+    // First check if we're returning from an OAuth flow
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      // Get the service that initiated this auth flow
+      const authService = localStorage.getItem('integration_auth_service');
+      const returnUrl = localStorage.getItem('integration_auth_return_url');
+      const token = hash.split('access_token=')[1].split('&')[0];
+      
+      console.log('Received OAuth callback with token');
+      
+      if (authService === 'calendar') {
+        calendarIntegration.init(token)
+          .then(() => {
+            setCalendarAuth(true);
+            showMessage('Google Calendar connected successfully', 'success');
+          })
+          .catch(err => {
+            showMessage(`Failed to connect Calendar: ${err.message}`, 'error');
+            console.error('Calendar error:', err);
+          });
+      } else if (authService === 'email') {
+        emailIntegration.init(token)
+          .then(() => {
+            setEmailAuth(true);
+            showMessage('Gmail connected successfully', 'success');
+          })
+          .catch(err => {
+            showMessage(`Failed to connect Gmail: ${err.message}`, 'error');
+            console.error('Gmail error:', err);
+          });
+      } else if (authService === 'linkedin') {
+        linkedinIntegration.init(token)
+          .then(() => {
+            setLinkedinAuth(true);
+            showMessage('LinkedIn connected successfully', 'success');
+          })
+          .catch(err => {
+            showMessage(`Failed to connect LinkedIn: ${err.message}`, 'error');
+            console.error('LinkedIn error:', err);
+          });
+      }
+      
+      // Clean up localStorage and URL hash
+      localStorage.removeItem('integration_auth_service');
+      localStorage.removeItem('integration_auth_timestamp');
+      localStorage.removeItem('integration_auth_return_url');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // If we have a return URL, navigate back (but give time for the success message to show)
+      if (returnUrl) {
+        setTimeout(() => {
+          window.location.href = returnUrl;
+        }, 2000);
+      }
+    }
+    
+    // Check if there are existing tokens stored
     const calendarToken = localStorage.getItem('google_calendar_token');
     const emailToken = localStorage.getItem('gmail_token');
     const linkedinToken = localStorage.getItem('linkedin_token');
@@ -59,27 +116,33 @@ const IntegrationManager = ({ onClose }) => {
         ? 'https://www.googleapis.com/auth/calendar'
         : 'https://www.googleapis.com/auth/gmail.send';
 
-      // Create OAuth URL
-      const redirectUri = window.location.origin;
+      // Create OAuth URL - redirect to same page
+      const redirectUri = window.location.href.split('#')[0]; // Remove any existing hash
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scopes}`;
 
       // Store the requested service to handle the callback
       sessionStorage.setItem('auth_service', service);
 
-      // Open the OAuth popup
-      const popup = window.open(authUrl, 'oauth', 'width=500,height=600');
+      // Instead of using a popup window, redirect the user directly
+      // Store state in localStorage to handle the redirect
+      localStorage.setItem('integration_auth_service', service);
+      localStorage.setItem('integration_auth_timestamp', Date.now());
+      localStorage.setItem('integration_auth_return_url', window.location.href);
       
-      // Poll to check if popup closed
-      const checkPopup = setInterval(() => {
-        if (!popup || popup.closed) {
-          clearInterval(checkPopup);
-
-          // Check if we got a token from URL hash
-          const hash = window.location.hash;
-          if (hash && hash.includes('access_token')) {
-            const token = hash.split('access_token=')[1].split('&')[0];
-            
-            if (service === 'calendar') {
+      // Display message
+      showMessage('Redirecting to authorization page...', 'info');
+      
+      // Wait a moment then redirect
+      setTimeout(() => {
+        // Redirect to the OAuth page
+        window.location.href = authUrl;
+      }, 1000);
+      
+      // The code below will not execute due to the redirect
+      // It's kept for reference in case we need to go back to popup approach
+      if (false) { // Never executes
+        const token = '';
+        if (service === 'calendar') {
               calendarIntegration.init(token)
                 .then(() => {
                   setCalendarAuth(true);
@@ -137,27 +200,33 @@ const IntegrationManager = ({ onClose }) => {
       
       const clientId = config.linkedinClientId;
 
-      // Create OAuth URL
-      const redirectUri = window.location.origin;
+      // Create OAuth URL - redirect to same page
+      const redirectUri = window.location.href.split('#')[0]; // Remove any existing hash
       const authUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=r_liteprofile,r_emailaddress,w_member_social`;
 
       // Store the requested service to handle the callback
       sessionStorage.setItem('auth_service', 'linkedin');
 
-      // Open the OAuth popup
-      const popup = window.open(authUrl, 'oauth', 'width=500,height=600');
+      // Instead of using a popup window, redirect the user directly
+      // Store state in localStorage to handle the redirect
+      localStorage.setItem('integration_auth_service', 'linkedin');
+      localStorage.setItem('integration_auth_timestamp', Date.now());
+      localStorage.setItem('integration_auth_return_url', window.location.href);
       
-      // Poll to check if popup closed
-      const checkPopup = setInterval(() => {
-        if (!popup || popup.closed) {
-          clearInterval(checkPopup);
-
-          // Check if we got a token from URL hash
-          const hash = window.location.hash;
-          if (hash && hash.includes('access_token')) {
-            const token = hash.split('access_token=')[1].split('&')[0];
-            
-            linkedinIntegration.init(token)
+      // Display message
+      showMessage('Redirecting to authorization page...', 'info');
+      
+      // Wait a moment then redirect
+      setTimeout(() => {
+        // Redirect to the OAuth page
+        window.location.href = authUrl;
+      }, 1000);
+      
+      // The code below will not execute due to the redirect
+      // It's kept for reference in case we need to go back to popup approach
+      if (false) { // Never executes
+        const token = '';
+        linkedinIntegration.init(token)
               .then(() => {
                 setLinkedinAuth(true);
                 showMessage('LinkedIn connected successfully');

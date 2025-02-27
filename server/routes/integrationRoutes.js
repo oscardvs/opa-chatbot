@@ -13,7 +13,12 @@ const router = express.Router();
 router.get('/debug', (req, res) => {
   res.json({
     message: 'Integration routes are working',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    env: {
+      nodeEnv: process.env.NODE_ENV,
+      googleConfigured: !!process.env.GOOGLE_CLIENT_ID,
+      linkedinConfigured: !!process.env.LINKEDIN_CLIENT_ID
+    }
   });
 });
 
@@ -30,36 +35,37 @@ router.get('/auth-config', (req, res) => {
   });
 });
 
-// Authorization endpoints
+// SPA OAuth Handling
+// For SPA apps, we don't use server-side callbacks since the token is handled directly by the frontend
+// These routes are kept for reference in case they're needed later
 router.get('/auth/google/callback', async (req, res) => {
-  try {
-    const { code, scope } = req.query;
-    
-    // Check what scope was granted to determine which service
-    if (scope.includes('calendar')) {
-      await calendarHandler.configure({ code });
-      res.send('Calendar authorization successful! You can close this window.');
-    } else if (scope.includes('gmail.send')) {
-      await gmailHandler.configure({ code });
-      res.send('Gmail authorization successful! You can close this window.');
-    } else {
-      res.status(400).send('Unknown scope requested');
-    }
-  } catch (error) {
-    console.error('Google auth error:', error);
-    res.status(500).send('Authentication error');
-  }
+  res.send(`
+    <html>
+      <head><title>Authentication Complete</title></head>
+      <body>
+        <h1>Authentication Complete</h1>
+        <p>You can close this window and return to the application.</p>
+        <script>
+          window.close();
+        </script>
+      </body>
+    </html>
+  `);
 });
 
 router.get('/auth/linkedin/callback', async (req, res) => {
-  try {
-    const { code } = req.query;
-    await linkedinHandler.configure({ code });
-    res.send('LinkedIn authorization successful! You can close this window.');
-  } catch (error) {
-    console.error('LinkedIn auth error:', error);
-    res.status(500).send('Authentication error');
-  }
+  res.send(`
+    <html>
+      <head><title>Authentication Complete</title></head>
+      <body>
+        <h1>Authentication Complete</h1>
+        <p>You can close this window and return to the application.</p>
+        <script>
+          window.close();
+        </script>
+      </body>
+    </html>
+  `);
 });
 
 // Calendar endpoints
