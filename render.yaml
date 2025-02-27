@@ -13,4 +13,4 @@ services:
   - type: static
     name: opa-frontend
     buildCommand: "cd client && npm install && npx vite build"
-    publishPath: "dist"
+    publishPath: "client/dist"

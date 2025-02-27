@@ -143,32 +143,30 @@ const IntegrationManager = ({ onClose }) => {
       if (false) { // Never executes
         const token = '';
         if (service === 'calendar') {
-              calendarIntegration.init(token)
-                .then(() => {
-                  setCalendarAuth(true);
-                  showMessage('Google Calendar connected successfully');
-                })
-                .catch(err => {
-                  showMessage(`Failed to connect Calendar: ${err.message}`, 'error');
-                  console.error('Calendar error:', err);
-                });
-            } else {
-              emailIntegration.init(token)
-                .then(() => {
-                  setEmailAuth(true);
-                  showMessage('Gmail connected successfully');
-                })
-                .catch(err => {
-                  showMessage(`Failed to connect Gmail: ${err.message}`, 'error');
-                  console.error('Gmail error:', err);
-                });
-            }
-            
-            // Clean up the URL hash
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
+          calendarIntegration.init(token)
+            .then(() => {
+              setCalendarAuth(true);
+              showMessage('Google Calendar connected successfully');
+            })
+            .catch(err => {
+              showMessage(`Failed to connect Calendar: ${err.message}`, 'error');
+              console.error('Calendar error:', err);
+            });
+        } else {
+          emailIntegration.init(token)
+            .then(() => {
+              setEmailAuth(true);
+              showMessage('Gmail connected successfully');
+            })
+            .catch(err => {
+              showMessage(`Failed to connect Gmail: ${err.message}`, 'error');
+              console.error('Gmail error:', err);
+            });
         }
-      }, 500);
+        
+        // Clean up the URL hash
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     } catch (error) {
       showMessage(`Authentication error: ${error.message}`, 'error');
       console.error('Google auth error:', error);
@@ -227,20 +225,18 @@ const IntegrationManager = ({ onClose }) => {
       if (false) { // Never executes
         const token = '';
         linkedinIntegration.init(token)
-              .then(() => {
-                setLinkedinAuth(true);
-                showMessage('LinkedIn connected successfully');
-              })
-              .catch(err => {
-                showMessage(`Failed to connect LinkedIn: ${err.message}`, 'error');
-                console.error('LinkedIn error:', err);
-              });
-            
-            // Clean up the URL hash
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        }
-      }, 500);
+          .then(() => {
+            setLinkedinAuth(true);
+            showMessage('LinkedIn connected successfully');
+          })
+          .catch(err => {
+            showMessage(`Failed to connect LinkedIn: ${err.message}`, 'error');
+            console.error('LinkedIn error:', err);
+          });
+        
+        // Clean up the URL hash
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     } catch (error) {
       showMessage(`Authentication error: ${error.message}`, 'error');
       console.error('LinkedIn auth error:', error);
