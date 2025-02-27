@@ -8,6 +8,11 @@ const IntegrationManager = ({ onClose }) => {
   const [emailAuth, setEmailAuth] = useState(false);
   const [linkedinAuth, setLinkedinAuth] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  
+  // Base API URL - to handle different deployment environments
+  const apiBaseUrl = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000/api' 
+    : '/api';
 
   // Check if there are existing tokens stored
   useEffect(() => {
@@ -30,7 +35,18 @@ const IntegrationManager = ({ onClose }) => {
   const handleGoogleAuth = async (service) => {
     try {
       // Request client ID from backend
-      const response = await fetch('/api/integrations/auth-config');
+      showMessage('Connecting to backend...', 'info');
+      const configUrl = `${apiBaseUrl}/integrations/auth-config`;
+      console.log('Fetching auth config from:', configUrl);
+      const response = await fetch(configUrl);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        showMessage(`API Error: ${response.status} ${errorText}`, 'error');
+        return;
+      }
+      
       const config = await response.json();
       
       if (!config.googleClientId) {
@@ -102,7 +118,18 @@ const IntegrationManager = ({ onClose }) => {
   const handleLinkedinAuth = async () => {
     try {
       // Request client ID from backend
-      const response = await fetch('/api/integrations/auth-config');
+      showMessage('Connecting to backend...', 'info');
+      const configUrl = `${apiBaseUrl}/integrations/auth-config`;
+      console.log('Fetching auth config from:', configUrl);
+      const response = await fetch(configUrl);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        showMessage(`API Error: ${response.status} ${errorText}`, 'error');
+        return;
+      }
+      
       const config = await response.json();
       
       if (!config.linkedinClientId) {
@@ -170,12 +197,46 @@ const IntegrationManager = ({ onClose }) => {
     }
   };
 
+  // Test API connection
+  const testApiConnection = async () => {
+    try {
+      showMessage('Testing API connection...', 'info');
+      const debugUrl = `${apiBaseUrl}/integrations/debug`;
+      console.log('Testing connection to:', debugUrl);
+      
+      const response = await fetch(debugUrl);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Debug API Error:', response.status, errorText);
+        showMessage(`API Test Failed: ${response.status} ${errorText}`, 'error');
+        return;
+      }
+      
+      const data = await response.json();
+      console.log('Debug API response:', data);
+      showMessage(`API connection successful: ${data.message}`, 'success');
+    } catch (error) {
+      console.error('API test error:', error);
+      showMessage(`API test error: ${error.message}`, 'error');
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center">
       <div className="bg-gradient-to-b from-purple-900/95 to-purple-800/95 rounded-2xl w-full max-w-lg mx-4 shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 bg-gradient-to-r from-purple-800/90 to-purple-700/90 border-b border-purple-700/50 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-purple-100">Integrations</h2>
+          <h2 className="text-lg font-semibold text-purple-100">
+            Integrations
+            <button 
+              onClick={testApiConnection}
+              className="ml-2 text-xs bg-purple-700/50 hover:bg-purple-600/50 px-2 py-0.5 rounded text-purple-300 hover:text-purple-200"
+              title="Test API Connection"
+            >
+              Test API
+            </button>
+          </h2>
           <button
             onClick={onClose}
             className="p-1 text-purple-300 hover:text-purple-100 hover:bg-purple-700/50 rounded-lg transition-colors"
@@ -226,10 +287,14 @@ const IntegrationManager = ({ onClose }) => {
           {/* Status message */}
           {message.text && (
             <div className={`mb-4 px-4 py-3 rounded-lg flex items-center space-x-2 ${
-              message.type === 'error' ? 'bg-red-900/30 text-red-300' : 'bg-green-900/30 text-green-300'
+              message.type === 'error' ? 'bg-red-900/30 text-red-300' : 
+              message.type === 'info' ? 'bg-blue-900/30 text-blue-300' :
+              'bg-green-900/30 text-green-300'
             }`}>
               {message.type === 'error' ? (
                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              ) : message.type === 'info' ? (
+                <div className="h-5 w-5 flex-shrink-0 animate-spin border-2 border-blue-300 border-t-transparent rounded-full" />
               ) : (
                 <Check className="h-5 w-5 flex-shrink-0" />
               )}

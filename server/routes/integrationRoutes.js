@@ -9,8 +9,21 @@ dotenv.config();
 
 const router = express.Router();
 
+// Debug endpoint
+router.get('/debug', (req, res) => {
+  res.json({
+    message: 'Integration routes are working',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Endpoint to securely provide client IDs to the frontend
 router.get('/auth-config', (req, res) => {
+  console.log('Auth config requested');
+  // Log environment variables (without exposing secrets)
+  console.log('GOOGLE_CLIENT_ID present:', !!process.env.GOOGLE_CLIENT_ID);
+  console.log('LINKEDIN_CLIENT_ID present:', !!process.env.LINKEDIN_CLIENT_ID);
+  
   res.json({
     googleClientId: process.env.GOOGLE_CLIENT_ID || '',
     linkedinClientId: process.env.LINKEDIN_CLIENT_ID || ''
