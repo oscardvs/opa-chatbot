@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: opa-backend
+    env: node
+    buildCommand: "cd server && npm install"
+    startCommand: "node server.js"
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
+
+  - type: static
+    name: opa-frontend
+    buildCommand: "cd client && npm install && npx vite build"
+    publishPath: "dist"
